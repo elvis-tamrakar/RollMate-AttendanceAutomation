@@ -4,9 +4,9 @@
 This project is a geofencing and biometric based attendance system built with Java/Spring for the backend and React for the frontend.
 
 ## Team Members
-- Elvis (Project Manager/ Tester)
 - Rijan & Suren (Backend Developers)
 - Karuna & Divya (Frontend Developers)
+- Elvis (Project Manager/ Tester)
 
 ## Setup Instructions
 ### Backend
