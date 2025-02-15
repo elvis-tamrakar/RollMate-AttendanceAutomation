@@ -1,0 +1,149 @@
+/* General Styles */
+body {
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f0f8ff; /* Light background for the whole page */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Main Container */
+.container {
+  display: flex;
+  justify-content: center; /* Center the content horizontally */
+  align-items: center;
+  width: 100%;
+  max-width: 1200px;
+  height: 100vh;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Left Section - Description */
+.description {
+  width: 45%;
+  padding: 40px;
+  background-color: #fff8e1; /* Soft light yellow background */
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 1.2s ease-out;
+  text-align: left;
+  margin-right: 60px; /* Space between description and sign-in form */
+}
+
+.description h2 {
+  font-size: 32px;
+  color: #4a90e2;
+  margin-bottom: 20px;
+  animation: slideIn 0.5s ease-out;
+}
+
+.description p {
+  font-size: 16px;
+  color: #333;
+  line-height: 1.5;
+  animation: fadeInUp 1s ease-out;
+}
+
+/* Sign-In Container */
+.signin-container {
+  width: 100%;
+  max-width: 350px;
+  background-color: #f8f1e5; /* Light sweet brown color for the sign-in container */
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+  animation: fadeIn 1s ease-out;
+}
+
+/* Card Header */
+.signin-card h2 {
+  text-align: center;
+  font-size: 28px;
+  margin-bottom: 20px;
+  color: #4a90e2;
+  animation: slideIn 0.5s ease-out;
+}
+
+/* Input Fields */
+.input-container {
+  margin-bottom: 15px;
+}
+
+input, select {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  transition: border-color 0.3s ease;
+  animation: fadeInUp 1s ease-out;
+}
+
+/* Focus Effect */
+input:focus, select:focus {
+  border-color: #4a90e2;
+  outline: none;
+}
+
+/* Submit Button */
+button {
+  width: 100%;
+  padding: 12px;
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+  animation: fadeInUp 1.2s ease-out;
+}
+
+button:hover {
+  background-color: #357ae8;
+}
+
+/* Attendance Buttons */
+.circle-button {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 10px;
+  background-color: #ccc;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.circle-button:hover {
+  background-color: #a6d8ff;
+}
+
+.circle-button.active-green {
+  background-color: #28a745;
+}
+
+.circle-button.active-red {
+  background-color: #dc3545;
+}
+
+.attendance-form {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.student-item.green {
+  color: green;
+}
+
+.student-item.red {
+  color: red;
+}
