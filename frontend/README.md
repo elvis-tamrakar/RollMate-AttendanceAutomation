@@ -1,12 +1,8 @@
-# Frontend
+# React + Vite
 
-This folder contains the frontend code for the Attendance Automation system.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## Technologies Used
-- React
-- Material-UI
+Currently, two official plugins are available:
 
-## Setup Instructions
-1. Navigate to the `frontend/` folder.
-2. Run `npm install` to install dependencies.
-3. Run `npm start` to start the development server.
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
