@@ -1,0 +1,25 @@
+/* App.css */
+body {
+  background: #f8f9fa;
+}
+
+.shadow {
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.lead {
+  color: #6c757d;
+}
+
+.min-vh-100 {
+  min-height: 100vh;
+}
+
+.table-hover tbody tr:hover {
+  background-color: rgba(0, 123, 255, 0.05);
+}
+
+.badge {
+  font-size: 0.9em;
+  padding: 0.6em 1em;
+}
