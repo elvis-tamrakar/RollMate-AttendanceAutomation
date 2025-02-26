@@ -1,0 +1,175 @@
+/* General Root Styles */
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+  background-color: #f7f9fc; /* Lighter, more professional background */
+  border-radius: 20px; /* More rounded corners */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); /* Slightly stronger shadow */
+  font-family: 'Poppins', sans-serif; /* Modern font */
+}
+
+/* Logo Styles */
+.logo {
+  height: 7em;
+  padding: 1.5em;
+  transition: transform 300ms ease, filter 300ms ease;
+  border-radius: 50%;
+  background-color: #fff;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); /* Stronger shadow for depth */
+}
+
+.logo:hover {
+  filter: drop-shadow(0 0 15px #646cff);
+  transform: scale(1.1); /* More noticeable zoom effect */
+}
+
+.logo.react:hover {
+  filter: drop-shadow(0 0 15px #61dafb);
+}
+
+/* Card Styles */
+.card {
+  padding: 2.5em;
+  background-color: #ffffff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  border-radius: 15px;
+  margin: 2rem 0;
+  transition: transform 200ms ease, box-shadow 300ms ease;
+}
+
+.card:hover {
+  transform: translateY(-7px);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* Text Links */
+.read-the-docs {
+  color: #888;
+  font-size: 1.1rem;
+  transition: color 300ms ease;
+}
+
+.read-the-docs:hover {
+  color: #5058e0; /* Subtle hover effect for links */
+}
+
+/* Gradient Background for Auth Pages */
+.auth-background {
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-size: cover;
+  background-position: center;
+}
+
+/* Form Styles */
+.auth-form {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(15px);
+  border-radius: 18px;
+  padding: 3rem;
+  box-shadow: 0 8px 36px rgba(0, 0, 0, 0.15);
+}
+
+.auth-form h2 {
+  color: #333;
+  margin-bottom: 1.5rem;
+}
+
+.auth-form .form-control {
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  padding: 0.75rem;
+  font-size: 1rem;
+}
+
+.auth-form .form-control:focus {
+  border-color: #646cff;
+  box-shadow: 0 0 0 3px rgba(100, 108, 255, 0.3);
+}
+
+.auth-form .btn-primary {
+  background: #646cff;
+  border: none;
+  border-radius: 10px;
+  padding: 0.75rem;
+  font-size: 1.1rem;
+  transition: background 300ms ease;
+}
+
+.auth-form .btn-primary:hover {
+  background: #5058e0;
+}
+
+.auth-form .text-center a {
+  color: #646cff;
+  text-decoration: none;
+  transition: color 200ms ease;
+}
+
+.auth-form .text-center a:hover {
+  color: #5058e0;
+}
+
+/* Button Styles */
+button {
+  transition: background-color 300ms ease, transform 200ms ease;
+}
+
+button:hover {
+  transform: translateY(-3px);
+  background-color: #5058e0; /* More vibrant button on hover */
+}
+
+/* Table Styling */
+.table {
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.table th, .table td {
+  text-align: center;
+  padding: 1rem;
+}
+
+.table th {
+  background-color: #f2f2f7;
+  color: #5058e0;
+}
+
+/* Table Hover Effect */
+.table tbody tr:hover {
+  background-color: #f1f4ff;
+  cursor: pointer;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  #root {
+    padding: 1rem;
+    border-radius: 10px;
+    box-shadow: none;
+  }
+
+  .logo {
+    height: 5em;
+    padding: 1em;
+  }
+
+  .card {
+    padding: 1.5em;
+  }
+
+  .auth-background {
+    padding: 1rem;
+  }
+
+  .auth-form {
+    padding: 2rem;
+  }
+}
