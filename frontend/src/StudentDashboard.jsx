@@ -1,42 +1,27 @@
-import { useState } from 'react';
-import { Button, Card, Container, Navbar, Table } from 'react-bootstrap';
+import { Card, Container, Table } from 'react-bootstrap';
 
-// Named export for StudentDashboard
 export function StudentDashboard() {
-  const [attendance] = useState([
-    { date: '2023-10-01', status: 'Present' },
-    { date: '2023-10-02', status: 'Absent' },
-  ]);
-  const [isGeofenceActive, setIsGeofenceActive] = useState(false);
-  const [isInsideBoundary, setIsInsideBoundary] = useState(true);
-
-  const handleGeofenceToggle = () => {
-    setIsGeofenceActive((prevState) => !prevState);
-  };
+  // Static attendance data (generated once)
+  const attendance = generateAttendanceRecords();
 
   return (
     <Container className="my-5">
-      <Navbar bg="light" className="mb-4">
-        <Navbar.Brand>Student Portal</Navbar.Brand>
-        <Button onClick={handleGeofenceToggle}>
-          {isGeofenceActive ? 'Disable Geofence' : 'Enable Geofence'}
-        </Button>
-      </Navbar>
-
       <Card className="shadow">
         <Card.Body>
-          <h4 className="mb-3">Attendance Record</h4>
+          <h4 className="mb-3">Your Attendance Record</h4>
           <Table striped bordered hover>
             <thead>
               <tr>
                 <th>Date</th>
+                <th>Time</th>
                 <th>Status</th>
               </tr>
             </thead>
             <tbody>
-              {attendance.map((record, index) => (
-                <tr key={index}>
+              {attendance.map((record) => (
+                <tr key={record.id}>
                   <td>{record.date}</td>
+                  <td>{record.time}</td>
                   <td>{record.status}</td>
                 </tr>
               ))}
@@ -44,12 +29,16 @@ export function StudentDashboard() {
           </Table>
         </Card.Body>
       </Card>
-
-      <div className="mt-4 text-center">
-        <Button variant="outline-primary" onClick={() => setIsInsideBoundary(!isInsideBoundary)}>
-          Simulate Location: {isInsideBoundary ? 'Inside' : 'Outside'}
-        </Button>
-      </div>
     </Container>
   );
+}
+
+// Generate static records (no random changes)
+function generateAttendanceRecords() {
+  return Array.from({ length: 15 }, (_, i) => ({
+    id: i + 1,
+    date: new Date(Date.now() - (15 - i) * 86400000).toLocaleDateString(),
+    time: '06:00 PM - 10:00 PM',
+    status: 'Present', // Default static status
+  }));
 }

@@ -1,6 +1,7 @@
-// src/pages/Login.js
+// src/pages/Login.jsx
 import { useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import './Login.css';
 
 const Login = () => {
   const [username, setUsername] = useState('');

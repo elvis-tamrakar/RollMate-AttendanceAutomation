@@ -4,10 +4,14 @@ import { BrowserRouter as Router, Route, Routes, Link, useNavigate, Navigate } f
 import { Container, Row, Col, Form, Button, Card } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
+import './Login.css';
 import rollMateImage from './assets/RollMate.png';
 import process from 'process';
 import { StudentDashboard } from './StudentDashboard'; // Updated path
-import { TeacherDashboard } from './TeacherDashboard'; // Updated path
+import TeacherDashboard from './TeacherDashboard'; // Correct import for default export
+import StudentDetails from './StudentDetails'; // Import the updated component
+import { StudentAttendanceDetail } from './StudentAttendanceDetail'; // Import the new component
+
 window.process = process;
 
 // AuthForm Component
@@ -92,16 +96,29 @@ function AuthForm({ isLogin }) {
 }
 
 function App() {
+  // Function to determine if the user is a teacher
+  const isTeacher = () => {
+    // Replace this logic with your actual authentication/role-checking logic
+    const userType = localStorage.getItem('userType'); // Example: Get user type from localStorage
+    return userType === 'teacher';
+  };
+
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="/login" element={<AuthForm isLogin={true} />} />
-        <Route path="/signup" element={<AuthForm isLogin={false} />} />
-        <Route path="/student-dashboard" element={<StudentDashboard />} />
-        <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
-      </Routes>
-    </Router>
+    <Routes>
+      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/login" element={<AuthForm isLogin={true} />} />
+      <Route path="/signup" element={<AuthForm isLogin={false} />} />
+      <Route path="/class/:classId/student/:studentId" element={<StudentDetails />} />
+      <Route path="/student-dashboard" element={<StudentDashboard />} />
+      <Route path="/teacher-dashboard" element={<TeacherDashboard />} /> {/* Correct usage */}
+      <Route path="/class/:classId/student/:studentId" element={<StudentDetails />} />
+      <Route
+        path="/student/:studentId"
+        element={<StudentAttendanceDetail isTeacher={isTeacher()} />}
+      />
+    </Routes>
+  </Router>
   );
 }
 
