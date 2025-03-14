@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { GoogleMap, LoadScript, DrawingManager } from '@react-google-maps/api';
+import { GoogleMap, LoadScript } from '@react-google-maps/api';
 
 const TORONTO_CENTER = {
   lat: 43.6532,
@@ -16,8 +16,6 @@ interface MapProps {
   readOnly?: boolean;
 }
 
-const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualization")[] = ["drawing"];
-
 export function MapboxMap({
   center = TORONTO_CENTER,
   zoom = INITIAL_ZOOM,
@@ -29,6 +27,7 @@ export function MapboxMap({
   const [error, setError] = useState<string | null>(null);
 
   const onLoad = useCallback((map: google.maps.Map) => {
+    console.log("Map loaded successfully");
     setMap(map);
   }, []);
 
@@ -55,12 +54,15 @@ export function MapboxMap({
   return (
     <LoadScript
       googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ''}
-      libraries={libraries}
       loadingElement={
         <div className="w-full h-[400px] rounded-lg border bg-gray-50 flex items-center justify-center">
           <p className="text-muted-foreground">Loading map...</p>
         </div>
       }
+      onError={(error) => {
+        console.error('Error loading Google Maps:', error);
+        setError('Failed to load Google Maps. Please check your API key and try again.');
+      }}
     >
       <GoogleMap
         mapContainerClassName="w-full h-[400px] rounded-lg border"
@@ -74,22 +76,7 @@ export function MapboxMap({
           mapTypeControl: false,
           fullscreenControl: false,
         }}
-      >
-        {!readOnly && (
-          <DrawingManager
-            options={{
-              drawingControl: true,
-              drawingControlOptions: {
-                position: window.google?.maps?.ControlPosition?.TOP_CENTER,
-                drawingModes: [
-                  window.google?.maps?.drawing?.OverlayType?.CIRCLE,
-                  window.google?.maps?.drawing?.OverlayType?.POLYGON,
-                ],
-              },
-            }}
-          />
-        )}
-      </GoogleMap>
+      />
     </LoadScript>
   );
 }
