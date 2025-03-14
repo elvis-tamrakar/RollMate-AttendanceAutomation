@@ -61,14 +61,52 @@ export class MemStorage implements IStorage {
     };
     this.users.set(testTeacher.id, testTeacher);
 
-    const testStudent = {
-      id: this.currentIds.users++,
-      name: "Jane Doe",
-      email: "student@example.com",
-      role: "student",
-      classId: null,
-    };
-    this.users.set(testStudent.id, testStudent);
+    // Adding test students
+    const students = [
+      { name: "Rijan Gurung", email: "rijan@example.com" },
+      { name: "Karunal Dahal", email: "karunal@example.com" },
+      { name: "Elvis Tamakar", email: "elvis@example.com" },
+      { name: "Suren Rajbanshi", email: "suren@example.com" },
+      { name: "Divya", email: "divya@example.com" }
+    ];
+
+    // Adding test classes
+    const classes = [
+      { name: "10 A", teacherId: testTeacher.id },
+      { name: "10 B", teacherId: testTeacher.id },
+      { name: "11 A", teacherId: testTeacher.id },
+      { name: "11 B", teacherId: testTeacher.id },
+      { name: "12 A", teacherId: testTeacher.id },
+      { name: "12 B", teacherId: testTeacher.id }
+    ];
+
+    // Create classes
+    classes.forEach((cls) => {
+      const id = this.currentIds.classes++;
+      this.classes.set(id, {
+        id,
+        name: cls.name,
+        description: `Class ${cls.name}`,
+        teacherId: cls.teacherId,
+        schedule: [],
+        geofence: null
+      });
+    });
+
+    // Distribute students across classes
+    const classIds = Array.from(this.classes.values()).map(c => c.id);
+    students.forEach((student, index) => {
+      const id = this.currentIds.users++;
+      const classId = classIds[index % classIds.length];
+      const newStudent = {
+        id,
+        name: student.name,
+        email: student.email,
+        role: "student",
+        classId
+      };
+      this.users.set(id, newStudent);
+    });
   }
 
   // Users
