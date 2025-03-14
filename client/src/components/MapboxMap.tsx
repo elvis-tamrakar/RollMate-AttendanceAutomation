@@ -25,8 +25,8 @@ interface MapboxMapProps {
 }
 
 export function MapboxMap({
-  center = [85.3240, 27.7172], // Default to Kathmandu coordinates
-  zoom = 12,
+  center = [-79.3832, 43.6532], // Default to Toronto coordinates
+  zoom = 11, // Slightly zoomed in for better city view
   geofence,
   onGeofenceChange,
   readOnly = false,
