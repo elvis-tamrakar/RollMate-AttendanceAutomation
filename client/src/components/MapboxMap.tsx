@@ -1,5 +1,4 @@
-import { useState, useCallback } from 'react';
-import { GoogleMap, LoadScript } from '@react-google-maps/api';
+import { useEffect, useRef, useState } from 'react';
 
 const TORONTO_CENTER = {
   lat: 43.6532,
@@ -23,17 +22,46 @@ export function MapboxMap({
   onGeofenceChange,
   readOnly = false,
 }: MapProps) {
-  const [map, setMap] = useState<google.maps.Map | null>(null);
+  const mapRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const onLoad = useCallback((map: google.maps.Map) => {
-    console.log("Map loaded successfully");
-    setMap(map);
-  }, []);
+  useEffect(() => {
+    if (!mapRef.current) return;
 
-  const onUnmount = useCallback(() => {
-    setMap(null);
-  }, []);
+    try {
+      const map = new google.maps.Map(mapRef.current, {
+        center,
+        zoom,
+        zoomControl: true,
+        streetViewControl: false,
+        mapTypeControl: false,
+        fullscreenControl: false,
+      });
+
+      // Log successful initialization
+      console.log('Map initialized successfully');
+
+      // Add drawing manager if not in readonly mode
+      if (!readOnly) {
+        const drawingManager = new google.maps.drawing.DrawingManager({
+          drawingMode: null,
+          drawingControl: true,
+          drawingControlOptions: {
+            position: google.maps.ControlPosition.TOP_CENTER,
+            drawingModes: [
+              google.maps.drawing.OverlayType.POLYGON,
+              google.maps.drawing.OverlayType.CIRCLE,
+            ],
+          },
+        });
+
+        drawingManager.setMap(map);
+      }
+    } catch (err) {
+      console.error('Error initializing map:', err);
+      setError('Failed to initialize map. Please try again later.');
+    }
+  }, [center, zoom, readOnly]);
 
   if (error) {
     return (
@@ -52,31 +80,9 @@ export function MapboxMap({
   }
 
   return (
-    <LoadScript
-      googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ''}
-      loadingElement={
-        <div className="w-full h-[400px] rounded-lg border bg-gray-50 flex items-center justify-center">
-          <p className="text-muted-foreground">Loading map...</p>
-        </div>
-      }
-      onError={(error) => {
-        console.error('Error loading Google Maps:', error);
-        setError('Failed to load Google Maps. Please check your API key and try again.');
-      }}
-    >
-      <GoogleMap
-        mapContainerClassName="w-full h-[400px] rounded-lg border"
-        center={center}
-        zoom={zoom}
-        onLoad={onLoad}
-        onUnmount={onUnmount}
-        options={{
-          zoomControl: true,
-          streetViewControl: false,
-          mapTypeControl: false,
-          fullscreenControl: false,
-        }}
-      />
-    </LoadScript>
+    <div 
+      ref={mapRef} 
+      className="w-full h-[400px] rounded-lg border"
+    />
   );
 }
