@@ -1,25 +1,15 @@
-import { useEffect, useRef, useState } from "react";
+import { useState, useCallback } from 'react';
+import { GoogleMap, LoadScript, DrawingManager } from '@react-google-maps/api';
 
-// Load Mapbox GL JS from CDN
-const mapboxgl = (window as any).mapboxgl;
-const MapboxDraw = (window as any).MapboxDraw;
+const TORONTO_CENTER = {
+  lat: 43.6532,
+  lng: -79.3832
+};
 
-// Ensure token is set before any initialization
-const token = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
-if (!token) {
-  console.error("Mapbox token is missing from environment variables");
-  throw new Error("Mapbox token is required");
-}
+const INITIAL_ZOOM = 11;
 
-// Set the token
-mapboxgl.accessToken = token;
-
-console.log("Initializing Mapbox with token:", token.substring(0, 8) + "...");
-
-const GEOFENCE_RADIUS = 500; // meters
-
-interface MapboxMapProps {
-  center?: [number, number];
+interface MapProps {
+  center?: { lat: number; lng: number };
   zoom?: number;
   geofence?: any;
   onGeofenceChange?: (geofence: any) => void;
@@ -27,102 +17,22 @@ interface MapboxMapProps {
 }
 
 export function MapboxMap({
-  center = [-79.3832, 43.6532], // Toronto coordinates
-  zoom = 11,
+  center = TORONTO_CENTER,
+  zoom = INITIAL_ZOOM,
   geofence,
   onGeofenceChange,
   readOnly = false,
-}: MapboxMapProps) {
-  const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<any>(null);
-  const draw = useRef<any>(null);
+}: MapProps) {
+  const [map, setMap] = useState<google.maps.Map | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!mapContainer.current) return;
-
-    try {
-      console.log("Creating map instance...", {
-        center,
-        zoom,
-        token: token.substring(0, 8) + "..."
-      });
-
-      // Create new map instance
-      map.current = new mapboxgl.Map({
-        container: mapContainer.current,
-        style: "mapbox://styles/mapbox/streets-v11",
-        center,
-        zoom,
-        attributionControl: false,
-      });
-
-      // Add basic controls
-      map.current.addControl(new mapboxgl.NavigationControl(), "top-right");
-
-      // Error handling
-      map.current.on("error", (e: any) => {
-        console.error("Mapbox error:", e);
-        setError(
-          "Failed to load map resources. Please check your internet connection."
-        );
-      });
-
-      // Initialize drawing tools after map loads
-      map.current.on("load", () => {
-        console.log("Map loaded successfully");
-
-        if (!readOnly && MapboxDraw) {
-          draw.current = new MapboxDraw({
-            displayControlsDefault: false,
-            controls: {
-              polygon: true,
-              trash: true,
-            },
-          });
-
-          map.current.addControl(draw.current);
-
-          // Set initial geofence if provided
-          if (geofence) {
-            draw.current.set(geofence);
-          }
-
-          // Event handlers for geofence changes
-          map.current.on("draw.create", () => {
-            const data = draw.current?.getAll();
-            onGeofenceChange?.(data);
-          });
-
-          map.current.on("draw.delete", () => {
-            const data = draw.current?.getAll();
-            onGeofenceChange?.(data);
-          });
-
-          map.current.on("draw.update", () => {
-            const data = draw.current?.getAll();
-            onGeofenceChange?.(data);
-          });
-        }
-      });
-    } catch (err) {
-      console.error("Error initializing map:", err);
-      setError("Failed to initialize map. Please try again later.");
-    }
-
-    return () => {
-      if (map.current) {
-        map.current.remove();
-      }
-    };
+  const onLoad = useCallback((map: google.maps.Map) => {
+    setMap(map);
   }, []);
 
-  // Update geofence when prop changes
-  useEffect(() => {
-    if (draw.current && geofence) {
-      draw.current.set(geofence);
-    }
-  }, [geofence]);
+  const onUnmount = useCallback(() => {
+    setMap(null);
+  }, []);
 
   if (error) {
     return (
@@ -141,6 +51,42 @@ export function MapboxMap({
   }
 
   return (
-    <div ref={mapContainer} className="w-full h-[400px] rounded-lg border" />
+    <LoadScript
+      googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ''}
+      loadingElement={
+        <div className="w-full h-[400px] rounded-lg border bg-gray-50 flex items-center justify-center">
+          <p className="text-muted-foreground">Loading map...</p>
+        </div>
+      }
+    >
+      <GoogleMap
+        mapContainerClassName="w-full h-[400px] rounded-lg border"
+        center={center}
+        zoom={zoom}
+        onLoad={onLoad}
+        onUnmount={onUnmount}
+        options={{
+          zoomControl: true,
+          streetViewControl: false,
+          mapTypeControl: false,
+          fullscreenControl: false,
+        }}
+      >
+        {!readOnly && (
+          <DrawingManager
+            options={{
+              drawingControl: true,
+              drawingControlOptions: {
+                position: google.maps.ControlPosition.TOP_CENTER,
+                drawingModes: [
+                  google.maps.drawing.OverlayType.CIRCLE,
+                  google.maps.drawing.OverlayType.POLYGON,
+                ],
+              },
+            }}
+          />
+        )}
+      </GoogleMap>
+    </LoadScript>
   );
 }
