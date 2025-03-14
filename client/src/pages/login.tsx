@@ -72,11 +72,11 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-primary/10 to-primary/5">
       <Card className="w-full max-w-md mx-4">
         <CardHeader className="space-y-2 text-center">
-          <div className="flex justify-center mb-6">
+          <div className="flex justify-center mb-2">
             <img 
-              src="/attached_assets/Rollmate.jpg" 
+              src="attached_assets/Rollmate.jpg" 
               alt="RollMate Logo" 
-              className="w-64 rounded-lg"
+              className="h-32 w-auto object-contain"
             />
           </div>
           <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
