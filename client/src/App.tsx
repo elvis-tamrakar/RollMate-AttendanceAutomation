@@ -10,6 +10,7 @@ import StudentDashboard from "@/pages/student/dashboard";
 import Classes from "@/pages/classes";
 import Students from "@/pages/students";
 import Attendance from "@/pages/attendance";
+import Insights from "@/pages/insights";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -54,6 +55,12 @@ function Router() {
       <Route path="/attendance">
         <ProtectedRoute allowedRole="teacher">
           <Attendance />
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/insights">
+        <ProtectedRoute allowedRole="teacher">
+          <Insights />
         </ProtectedRoute>
       </Route>
 
