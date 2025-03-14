@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertClassSchema, insertEventSchema, insertAttendanceSchema, insertUserSchema } from "@shared/schema";
+import * as z from 'zod';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication
@@ -93,7 +94,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/students", async (req, res) => {
-    const result = insertStudentSchema.safeParse(req.body);
+    const result = insertUserSchema.extend({
+      role: z.literal("student"),
+      classId: z.number().min(1),
+    }).safeParse(req.body);
+
     if (!result.success) {
       return res.status(400).json({ message: "Invalid student data" });
     }

@@ -2,6 +2,7 @@ import { pgTable, text, serial, integer, timestamp, boolean, json } from "drizzl
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// User table and types
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
@@ -10,15 +11,17 @@ export const users = pgTable("users", {
   classId: integer("class_id"), // null for teachers
 });
 
+// Class table and types
 export const classes = pgTable("classes", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   description: text("description"),
   teacherId: integer("teacher_id").notNull(),
   schedule: json("schedule").notNull(), // Array of class timings
-  geofence: json("geofence"), // Mapbox geofence configuration
+  geofence: json("geofence"), // Geofence configuration
 });
 
+// Event table and types
 export const events = pgTable("events", {
   id: serial("id").primaryKey(),
   classId: integer("class_id").notNull(),
@@ -28,6 +31,7 @@ export const events = pgTable("events", {
   type: text("type").notNull(), // 'assignment' or 'event'
 });
 
+// Attendance table and types
 export const attendance = pgTable("attendance", {
   id: serial("id").primaryKey(),
   studentId: integer("student_id").notNull(),
@@ -39,37 +43,10 @@ export const attendance = pgTable("attendance", {
 });
 
 // Insert schemas
-export const insertUserSchema = createInsertSchema(users).pick({
-  name: true,
-  email: true,
-  role: true,
-  classId: true,
-});
-
-export const insertClassSchema = createInsertSchema(classes).pick({
-  name: true,
-  description: true,
-  teacherId: true,
-  schedule: true,
-  geofence: true,
-});
-
-export const insertEventSchema = createInsertSchema(events).pick({
-  classId: true,
-  title: true,
-  description: true,
-  dueDate: true,
-  type: true,
-});
-
-export const insertAttendanceSchema = createInsertSchema(attendance).pick({
-  studentId: true,
-  classId: true,
-  date: true,
-  status: true,
-  note: true,
-  location: true,
-});
+export const insertUserSchema = createInsertSchema(users);
+export const insertClassSchema = createInsertSchema(classes);
+export const insertEventSchema = createInsertSchema(events);
+export const insertAttendanceSchema = createInsertSchema(attendance);
 
 // Types
 export type User = typeof users.$inferSelect;
