@@ -50,6 +50,25 @@ export class MemStorage implements IStorage {
     this.students = new Map();
     this.attendance = new Map();
     this.currentIds = { users: 1, classes: 1, events: 1, students: 1, attendance: 1 };
+
+    // Adding test users
+    const testTeacher = {
+      id: this.currentIds.users++,
+      name: "John Smith",
+      email: "teacher@example.com",
+      role: "teacher",
+      classId: null,
+    };
+    this.users.set(testTeacher.id, testTeacher);
+
+    const testStudent = {
+      id: this.currentIds.users++,
+      name: "Jane Doe",
+      email: "student@example.com",
+      role: "student",
+      classId: null,
+    };
+    this.users.set(testStudent.id, testStudent);
   }
 
   // Users
@@ -121,7 +140,7 @@ export class MemStorage implements IStorage {
     return newEvent;
   }
 
-    // Students
+  // Students
   async getStudents(classId?: number): Promise<Student[]> {
     const students = Array.from(this.students.values());
     if (classId) {

@@ -3,6 +3,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
 import { Sidebar } from "@/components/layout/sidebar";
+import { ProtectedRoute } from "@/components/auth/protected-route";
 import Login from "@/pages/login";
 import TeacherDashboard from "@/pages/teacher/dashboard";
 import StudentDashboard from "@/pages/student/dashboard";
@@ -17,26 +18,44 @@ function Router() {
       <Route path="/login" component={Login} />
 
       <Route path="/teacher">
-        <div className="flex h-screen">
-          <Sidebar />
-          <main className="flex-1 overflow-y-auto p-8">
-            <TeacherDashboard />
-          </main>
-        </div>
+        <ProtectedRoute allowedRole="teacher">
+          <div className="flex h-screen">
+            <Sidebar />
+            <main className="flex-1 overflow-y-auto p-8">
+              <TeacherDashboard />
+            </main>
+          </div>
+        </ProtectedRoute>
       </Route>
 
       <Route path="/student">
-        <div className="flex h-screen">
-          <Sidebar />
-          <main className="flex-1 overflow-y-auto p-8">
-            <StudentDashboard />
-          </main>
-        </div>
+        <ProtectedRoute allowedRole="student">
+          <div className="flex h-screen">
+            <Sidebar />
+            <main className="flex-1 overflow-y-auto p-8">
+              <StudentDashboard />
+            </main>
+          </div>
+        </ProtectedRoute>
       </Route>
 
-      <Route path="/classes" component={Classes} />
-      <Route path="/students" component={Students} />
-      <Route path="/attendance" component={Attendance} />
+      <Route path="/classes">
+        <ProtectedRoute allowedRole="teacher">
+          <Classes />
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/students">
+        <ProtectedRoute allowedRole="teacher">
+          <Students />
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/attendance">
+        <ProtectedRoute allowedRole="teacher">
+          <Attendance />
+        </ProtectedRoute>
+      </Route>
 
       <Route path="/">
         <Redirect to="/login" />
