@@ -17,12 +17,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import type { Class, Student, Attendance } from "@shared/schema";
+import type { Class, User, Attendance } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function AttendancePage() {
@@ -34,7 +33,7 @@ export default function AttendancePage() {
     queryKey: ["/api/classes"],
   });
 
-  const { data: students, isLoading: loadingStudents } = useQuery<Student[]>({
+  const { data: students, isLoading: loadingStudents } = useQuery<User[]>({
     queryKey: ["/api/students", { classId: selectedClass }],
     enabled: !!selectedClass,
   });
@@ -55,11 +54,11 @@ export default function AttendancePage() {
   const markAttendance = useMutation({
     mutationFn: async ({
       studentId,
-      present,
+      status,
       note,
     }: {
       studentId: number;
-      present: boolean;
+      status: string;
       note?: string;
     }) => {
       if (!selectedClass) return;
@@ -68,7 +67,7 @@ export default function AttendancePage() {
         studentId,
         classId: selectedClass,
         date: selectedDate,
-        present,
+        status,
         note,
       });
       return res.json();
@@ -93,15 +92,15 @@ export default function AttendancePage() {
   const updateAttendance = useMutation({
     mutationFn: async ({
       id,
-      present,
+      status,
       note,
     }: {
       id: number;
-      present: boolean;
+      status: string;
       note?: string;
     }) => {
       const res = await apiRequest("PATCH", `/api/attendance/${id}`, {
-        present,
+        status,
         note,
       });
       return res.json();
@@ -177,9 +176,9 @@ export default function AttendancePage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Student Name</TableHead>
-                  <TableHead>Present</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead>Note</TableHead>
-                  <TableHead className="w-24">Actions</TableHead>
+                  <TableHead className="w-24">Date</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -192,23 +191,33 @@ export default function AttendancePage() {
                     <TableRow key={student.id}>
                       <TableCell>{student.name}</TableCell>
                       <TableCell>
-                        <Switch
-                          checked={record?.present ?? false}
-                          onCheckedChange={(checked) => {
+                        <Select
+                          value={record?.status ?? "absent"}
+                          onValueChange={(status) => {
                             if (record) {
                               updateAttendance.mutate({
                                 id: record.id,
-                                present: checked,
-                                note: record.note,
+                                status,
+                                note: record.note ?? undefined,
                               });
                             } else {
                               markAttendance.mutate({
                                 studentId: student.id,
-                                present: checked,
+                                status,
                               });
                             }
                           }}
-                        />
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="present">Present</SelectItem>
+                            <SelectItem value="absent">Absent</SelectItem>
+                            <SelectItem value="late">Late</SelectItem>
+                            <SelectItem value="left_early">Left Early</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </TableCell>
                       <TableCell>
                         <Input
@@ -217,13 +226,13 @@ export default function AttendancePage() {
                             if (record) {
                               updateAttendance.mutate({
                                 id: record.id,
-                                present: record.present,
+                                status: record.status,
                                 note: e.target.value,
                               });
                             } else {
                               markAttendance.mutate({
                                 studentId: student.id,
-                                present: false,
+                                status: "absent",
                                 note: e.target.value,
                               });
                             }

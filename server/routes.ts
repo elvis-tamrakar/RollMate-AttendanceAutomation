@@ -1,13 +1,49 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertClassSchema, insertStudentSchema, insertAttendanceSchema } from "@shared/schema";
+import { insertClassSchema, insertEventSchema, insertAttendanceSchema, insertUserSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Authentication
+  app.get("/api/auth/me", async (req, res) => {
+    if (!req.session.userId) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+    const user = await storage.getUser(req.session.userId);
+    res.json(user);
+  });
+
+  app.post("/api/auth/login", async (req, res) => {
+    const result = insertUserSchema.partial().safeParse(req.body);
+    if (!result.success) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+    const user = await storage.getUserByEmail(result.data.email);
+    if (!user) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+    req.session.userId = user.id;
+    res.json(user);
+  });
+
+  app.post("/api/auth/logout", (req, res) => {
+    req.session.destroy(() => {
+      res.status(204).end();
+    });
+  });
+
   // Classes
-  app.get("/api/classes", async (_req, res) => {
+  app.get("/api/classes", async (req, res) => {
     const classes = await storage.getClasses();
     res.json(classes);
+  });
+
+  app.get("/api/classes/:id", async (req, res) => {
+    const cls = await storage.getClass(Number(req.params.id));
+    if (!cls) {
+      return res.status(404).json({ message: "Class not found" });
+    }
+    res.json(cls);
   });
 
   app.post("/api/classes", async (req, res) => {
@@ -19,9 +55,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(newClass);
   });
 
+  app.patch("/api/classes/:id", async (req, res) => {
+    const result = insertClassSchema.partial().safeParse(req.body);
+    if (!result.success) {
+      return res.status(400).json({ message: "Invalid class data" });
+    }
+    const updated = await storage.updateClass(Number(req.params.id), result.data);
+    res.json(updated);
+  });
+
   app.delete("/api/classes/:id", async (req, res) => {
     await storage.deleteClass(Number(req.params.id));
     res.status(204).end();
+  });
+
+  // Events
+  app.get("/api/events", async (req, res) => {
+    const classId = req.query.classId ? Number(req.query.classId) : undefined;
+    const events = await storage.getEvents(classId);
+    res.json(events);
+  });
+
+  app.post("/api/events", async (req, res) => {
+    const result = insertEventSchema.safeParse(req.body);
+    if (!result.success) {
+      return res.status(400).json({ message: "Invalid event data" });
+    }
+    const newEvent = await storage.createEvent(result.data);
+    res.json(newEvent);
   });
 
   // Students
@@ -55,6 +116,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       Number(classId),
       new Date(date as string)
     );
+    res.json(attendance);
+  });
+
+  app.get("/api/attendance/my", async (req, res) => {
+    if (!req.session.userId) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+    const user = await storage.getUser(req.session.userId);
+    if (!user || !user.classId) {
+      return res.status(400).json({ message: "No class assigned" });
+    }
+    const attendance = await storage.getStudentAttendance(req.session.userId);
     res.json(attendance);
   });
 

@@ -36,14 +36,14 @@ import {
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import type { Student, Class, InsertStudent } from "@shared/schema";
-import { insertStudentSchema } from "@shared/schema";
+import type { User, Class, InsertUser } from "@shared/schema";
+import { insertUserSchema } from "@shared/schema";
 
 export default function Students() {
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
 
-  const { data: students, isLoading: loadingStudents } = useQuery<Student[]>({
+  const { data: students, isLoading: loadingStudents } = useQuery<User[]>({
     queryKey: ["/api/students"],
   });
 
@@ -51,17 +51,18 @@ export default function Students() {
     queryKey: ["/api/classes"],
   });
 
-  const form = useForm<InsertStudent>({
-    resolver: zodResolver(insertStudentSchema),
+  const form = useForm<InsertUser>({
+    resolver: zodResolver(insertUserSchema),
     defaultValues: {
       name: "",
       email: "",
-      classId: 0,
+      role: "student",
+      classId: undefined,
     },
   });
 
   const createStudent = useMutation({
-    mutationFn: async (data: InsertStudent) => {
+    mutationFn: async (data: InsertUser) => {
       const res = await apiRequest("POST", "/api/students", data);
       return res.json();
     },
@@ -92,6 +93,8 @@ export default function Students() {
   if (loadingStudents || loadingClasses) {
     return <div>Loading...</div>;
   }
+
+  const studentsWithRole = students?.filter(u => u.role === "student");
 
   return (
     <div className="space-y-6">
@@ -187,7 +190,7 @@ export default function Students() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {students?.map((student) => (
+            {studentsWithRole?.map((student) => (
               <TableRow key={student.id}>
                 <TableCell>{student.name}</TableCell>
                 <TableCell>{student.email}</TableCell>

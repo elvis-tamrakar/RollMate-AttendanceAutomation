@@ -2,14 +2,14 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Users, GraduationCap, CheckCircle } from "lucide-react";
-import type { Class, Student, Attendance } from "@shared/schema";
+import type { Class, User, Attendance } from "@shared/schema";
 
 export default function Dashboard() {
   const { data: classes, isLoading: loadingClasses } = useQuery<Class[]>({
     queryKey: ["/api/classes"],
   });
 
-  const { data: students, isLoading: loadingStudents } = useQuery<Student[]>({
+  const { data: students, isLoading: loadingStudents } = useQuery<User[]>({
     queryKey: ["/api/students"],
   });
 
@@ -33,7 +33,7 @@ export default function Dashboard() {
     },
     {
       title: "Today's Attendance",
-      value: todayAttendance?.filter(a => a.present).length ?? 0,
+      value: todayAttendance?.filter(a => a.status === "present").length ?? 0,
       icon: CheckCircle,
       loading: loadingAttendance,
     },
@@ -42,7 +42,7 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Dashboard</h1>
-      
+
       <div className="grid gap-4 md:grid-cols-3">
         {stats.map((stat) => (
           <Card key={stat.title}>

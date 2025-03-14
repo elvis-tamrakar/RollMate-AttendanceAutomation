@@ -1,15 +1,26 @@
 import { 
   Class, InsertClass, 
   Student, InsertStudent,
-  Attendance, InsertAttendance
+  Attendance, InsertAttendance,
+  User, InsertUser,
+  Event, InsertEvent
 } from "@shared/schema";
 
 export interface IStorage {
+  // Users
+  getUser(id: number): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  createUser(data: InsertUser): Promise<User>;
+
   // Classes
   getClasses(): Promise<Class[]>;
   getClass(id: number): Promise<Class | undefined>;
   createClass(data: InsertClass): Promise<Class>;
-  deleteClass(id: number): Promise<void>;
+  updateClass(id: number, data: Partial<InsertClass>): Promise<Class>;
+
+  // Events
+  getEvents(classId?: number): Promise<Event[]>;
+  createEvent(data: InsertEvent): Promise<Event>;
 
   // Students
   getStudents(classId?: number): Promise<Student[]>;
@@ -19,23 +30,45 @@ export interface IStorage {
 
   // Attendance
   getAttendance(classId: number, date: Date): Promise<Attendance[]>;
+  getStudentAttendance(studentId: number): Promise<Attendance[]>;
   createAttendance(data: InsertAttendance): Promise<Attendance>;
   updateAttendance(id: number, data: Partial<InsertAttendance>): Promise<Attendance>;
 }
 
 export class MemStorage implements IStorage {
+  private users: Map<number, User>;
   private classes: Map<number, Class>;
+  private events: Map<number, Event>;
   private students: Map<number, Student>;
   private attendance: Map<number, Attendance>;
   private currentIds: { [key: string]: number };
 
   constructor() {
+    this.users = new Map();
     this.classes = new Map();
+    this.events = new Map();
     this.students = new Map();
     this.attendance = new Map();
-    this.currentIds = { classes: 1, students: 1, attendance: 1 };
+    this.currentIds = { users: 1, classes: 1, events: 1, students: 1, attendance: 1 };
   }
 
+  // Users
+  async getUser(id: number): Promise<User | undefined> {
+    return this.users.get(id);
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(u => u.email === email);
+  }
+
+  async createUser(data: InsertUser): Promise<User> {
+    const id = this.currentIds.users++;
+    const newUser = { ...data, id };
+    this.users.set(id, newUser);
+    return newUser;
+  }
+
+  // Classes
   async getClasses(): Promise<Class[]> {
     return Array.from(this.classes.values());
   }
@@ -55,10 +88,40 @@ export class MemStorage implements IStorage {
     return newClass;
   }
 
-  async deleteClass(id: number): Promise<void> {
-    this.classes.delete(id);
+  async updateClass(id: number, data: Partial<InsertClass>): Promise<Class> {
+    const existing = this.classes.get(id);
+    if (!existing) throw new Error("Class not found");
+
+    const updated: Class = { 
+      ...existing, 
+      ...data,
+      description: data.description ?? existing.description 
+    };
+    this.classes.set(id, updated);
+    return updated;
   }
 
+  // Events
+  async getEvents(classId?: number): Promise<Event[]> {
+    const events = Array.from(this.events.values());
+    if (classId) {
+      return events.filter(e => e.classId === classId);
+    }
+    return events;
+  }
+
+  async createEvent(data: InsertEvent): Promise<Event> {
+    const id = this.currentIds.events++;
+    const newEvent: Event = { 
+      ...data, 
+      id,
+      description: data.description ?? null 
+    };
+    this.events.set(id, newEvent);
+    return newEvent;
+  }
+
+    // Students
   async getStudents(classId?: number): Promise<Student[]> {
     const students = Array.from(this.students.values());
     if (classId) {
@@ -82,11 +145,18 @@ export class MemStorage implements IStorage {
     this.students.delete(id);
   }
 
+  // Attendance
   async getAttendance(classId: number, date: Date): Promise<Attendance[]> {
     return Array.from(this.attendance.values()).filter(a => 
       a.classId === classId && 
       new Date(a.date).toDateString() === date.toDateString()
     );
+  }
+
+  async getStudentAttendance(studentId: number): Promise<Attendance[]> {
+    return Array.from(this.attendance.values())
+      .filter(a => a.studentId === studentId)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }
 
   async createAttendance(data: InsertAttendance): Promise<Attendance> {
