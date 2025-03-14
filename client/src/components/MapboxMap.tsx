@@ -37,26 +37,18 @@ export function MapboxMap({
     if (!mapContainer.current) return;
 
     try {
+      console.log('Initializing map with token:', mapboxgl.accessToken.substring(0, 10) + '...');
+
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
-        style: 'mapbox://styles/mapbox/streets-v12',
+        style: 'mapbox://styles/mapbox/light-v11', // Using a simpler style
         center,
         zoom,
-        transformRequest: (url, resourceType) => {
-          // Add error handling for transformRequest
-          if (resourceType === 'Source' || resourceType === 'Tile') {
-            return {
-              url,
-              headers: {
-                'Authorization': `Bearer ${mapboxgl.accessToken}`,
-              },
-            };
-          }
-          return { url };
-        },
+        accessToken: mapboxgl.accessToken, // Explicitly set the token
       });
 
       map.current.on('load', () => {
+        console.log('Map loaded successfully');
         if (!readOnly && map.current) {
           // Initialize the draw control
           draw.current = new MapboxDraw({
