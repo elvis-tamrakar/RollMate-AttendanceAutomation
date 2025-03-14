@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import mapboxgl from 'mapbox-gl';
-import MapboxDraw from '@mapbox/mapbox-gl-draw';
-import 'mapbox-gl/dist/mapbox-gl.css';
-import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
+
+// Load Mapbox GL JS from CDN
+const mapboxgl = (window as any).mapboxgl;
+const MapboxDraw = (window as any).MapboxDraw;
 
 // Ensure token is set before any initialization
 const token = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
@@ -32,89 +32,69 @@ export function MapboxMap({
   readOnly = false,
 }: MapboxMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const draw = useRef<MapboxDraw | null>(null);
+  const map = useRef<any>(null);
+  const draw = useRef<any>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!mapContainer.current) return;
 
     try {
-      console.log('Initializing Mapbox with configuration:', {
-        center,
-        zoom,
-        token: token.substring(0, 10) + '...',
-      });
-
       // Create new map instance
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
-        style: 'mapbox://styles/mapbox/light-v11',
+        style: 'mapbox://styles/mapbox/streets-v12',
         center,
         zoom,
+        attributionControl: false,
       });
 
+      // Add attribution control
+      map.current.addControl(new mapboxgl.AttributionControl(), 'bottom-right');
+
       // Add navigation controls
-      map.current.addControl(new mapboxgl.NavigationControl());
+      map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
-      // Wait for map to load
+      // Error handling
+      map.current.on('error', (e: any) => {
+        console.error('Mapbox error:', e);
+        setError('Failed to load map resources. Please check your internet connection.');
+      });
+
+      // Initialize drawing tools after map loads
       map.current.on('load', () => {
-        console.log('Map loaded successfully');
-
-        if (!readOnly && map.current) {
-          // Initialize drawing controls
+        if (!readOnly && MapboxDraw) {
           draw.current = new MapboxDraw({
             displayControlsDefault: false,
             controls: {
               polygon: true,
-              trash: true,
-            },
-            styles: [
-              {
-                'id': 'gl-draw-polygon-fill',
-                'type': 'fill',
-                'filter': ['all', ['==', '$type', 'Polygon']],
-                'paint': {
-                  'fill-color': '#3b82f6',
-                  'fill-opacity': 0.1
-                }
-              },
-              {
-                'id': 'gl-draw-polygon-stroke',
-                'type': 'line',
-                'filter': ['all', ['==', '$type', 'Polygon']],
-                'paint': {
-                  'line-color': '#3b82f6',
-                  'line-width': 2
-                }
-              }
-            ]
+              trash: true
+            }
           });
 
           map.current.addControl(draw.current);
 
-          // Handle drawing events
+          // Event handlers for geofence changes
           map.current.on('draw.create', () => {
-            const data = draw.current?.getAll();
+            const data = draw.current.getAll();
             onGeofenceChange?.(data);
           });
 
           map.current.on('draw.delete', () => {
-            const data = draw.current?.getAll();
+            const data = draw.current.getAll();
             onGeofenceChange?.(data);
           });
 
           map.current.on('draw.update', () => {
-            const data = draw.current?.getAll();
+            const data = draw.current.getAll();
             onGeofenceChange?.(data);
           });
-        }
-      });
 
-      // Error handling
-      map.current.on('error', (e) => {
-        console.error('Mapbox error:', e);
-        setError('Failed to load map resources. Please check your internet connection.');
+          // Set initial geofence if provided
+          if (geofence) {
+            draw.current.set(geofence);
+          }
+        }
       });
 
     } catch (err) {
@@ -123,14 +103,17 @@ export function MapboxMap({
     }
 
     return () => {
-      map.current?.remove();
+      if (map.current) {
+        map.current.remove();
+      }
     };
   }, []);
 
   // Update geofence when prop changes
   useEffect(() => {
-    if (!draw.current || !geofence) return;
-    draw.current.set(geofence);
+    if (draw.current && geofence) {
+      draw.current.set(geofence);
+    }
   }, [geofence]);
 
   if (error) {
