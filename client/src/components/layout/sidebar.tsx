@@ -1,21 +1,36 @@
 import { Link, useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { 
   LayoutDashboard, 
   Users, 
   GraduationCap,
-  ClipboardCheck
+  ClipboardCheck,
+  Calendar,
+  BookOpen
 } from "lucide-react";
+import type { User } from "@shared/schema";
 
-const navigation = [
-  { name: "Dashboard", href: "/", icon: LayoutDashboard },
+const teacherNavigation = [
+  { name: "Dashboard", href: "/teacher", icon: LayoutDashboard },
   { name: "Classes", href: "/classes", icon: GraduationCap },
   { name: "Students", href: "/students", icon: Users },
   { name: "Attendance", href: "/attendance", icon: ClipboardCheck },
 ];
 
+const studentNavigation = [
+  { name: "Dashboard", href: "/student", icon: LayoutDashboard },
+  { name: "Schedule", href: "/student/schedule", icon: Calendar },
+  { name: "Materials", href: "/student/materials", icon: BookOpen },
+];
+
 export function Sidebar() {
   const [location] = useLocation();
+  const { data: user } = useQuery<User>({
+    queryKey: ["/api/auth/me"],
+  });
+
+  const navigation = user?.role === "teacher" ? teacherNavigation : studentNavigation;
 
   return (
     <div className="flex h-full flex-col bg-sidebar border-r">

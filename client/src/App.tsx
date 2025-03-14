@@ -42,25 +42,45 @@ function Router() {
 
       <Route path="/classes">
         <ProtectedRoute allowedRole="teacher">
-          <Classes />
+          <div className="flex h-screen">
+            <Sidebar />
+            <main className="flex-1 overflow-y-auto p-8">
+              <Classes />
+            </main>
+          </div>
         </ProtectedRoute>
       </Route>
 
       <Route path="/students">
         <ProtectedRoute allowedRole="teacher">
-          <Students />
+          <div className="flex h-screen">
+            <Sidebar />
+            <main className="flex-1 overflow-y-auto p-8">
+              <Students />
+            </main>
+          </div>
         </ProtectedRoute>
       </Route>
 
       <Route path="/attendance">
         <ProtectedRoute allowedRole="teacher">
-          <Attendance />
+          <div className="flex h-screen">
+            <Sidebar />
+            <main className="flex-1 overflow-y-auto p-8">
+              <Attendance />
+            </main>
+          </div>
         </ProtectedRoute>
       </Route>
 
       <Route path="/insights">
         <ProtectedRoute allowedRole="teacher">
-          <Insights />
+          <div className="flex h-screen">
+            <Sidebar />
+            <main className="flex-1 overflow-y-auto p-8">
+              <Insights />
+            </main>
+          </div>
         </ProtectedRoute>
       </Route>
 
