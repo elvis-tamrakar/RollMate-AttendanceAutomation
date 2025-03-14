@@ -69,21 +69,24 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-primary/10 to-primary/5">
-      <Card className="w-full max-w-md mx-4">
-        <CardHeader className="space-y-2 text-center">
-          <div className="flex justify-center mb-2">
-            <img 
-              src="/Rollmate.jpg" 
-              alt="RollMate Logo" 
-              className="h-32 w-auto object-contain"
-            />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-primary/10 p-4">
+      <Card className="w-full max-w-md mx-auto">
+        <CardHeader className="space-y-4">
+          <div className="flex justify-center transform hover:scale-105 transition-transform duration-200">
+            <div className="relative w-64 h-64 rounded-2xl overflow-hidden shadow-xl">
+              <img 
+                src="/Rollmate.jpg" 
+                alt="RollMate Logo" 
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+            </div>
           </div>
-          <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+          <CardTitle className="text-4xl font-bold text-center bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
             RollMate
           </CardTitle>
-          <CardDescription className="text-lg">
-            Sign in to your account
+          <CardDescription className="text-lg text-center">
+            Mark your spot, prove your presence
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -102,6 +105,7 @@ export default function Login() {
                       <Input
                         placeholder="Enter your email"
                         type="email"
+                        className="transition-all duration-200 focus:ring-2 focus:ring-primary"
                         {...field}
                       />
                     </FormControl>
@@ -121,7 +125,7 @@ export default function Login() {
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="transition-all duration-200 focus:ring-2 focus:ring-primary">
                           <SelectValue placeholder="Select your role" />
                         </SelectTrigger>
                       </FormControl>
@@ -137,17 +141,24 @@ export default function Login() {
 
               <Button
                 type="submit"
-                className="w-full bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90"
+                className="w-full bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 transition-all duration-200 transform hover:scale-[1.02]"
                 disabled={isPending}
               >
-                Sign In
+                {isPending ? (
+                  <div className="flex items-center gap-2">
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    Signing In...
+                  </div>
+                ) : (
+                  "Sign In"
+                )}
               </Button>
             </form>
           </Form>
 
-          <div className="mt-6 text-center text-sm text-muted-foreground">
-            <p>Don't have an account?</p>
-            <p>Please contact your administrator</p>
+          <div className="mt-8 text-center space-y-1">
+            <p className="text-sm text-muted-foreground">Don't have an account?</p>
+            <p className="text-sm text-muted-foreground">Please contact your administrator</p>
           </div>
         </CardContent>
       </Card>
