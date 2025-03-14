@@ -4,12 +4,15 @@ import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 
-// Ensure token is set
-if (!import.meta.env.VITE_MAPBOX_ACCESS_TOKEN) {
-  console.error('Mapbox token is required');
+// Ensure token is set before any initialization
+const token = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
+if (!token) {
+  console.error('Mapbox token is missing from environment variables');
+  throw new Error('Mapbox token is required');
 }
 
-mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
+// Set the token
+mapboxgl.accessToken = token;
 
 const GEOFENCE_RADIUS = 500; // meters
 
@@ -37,20 +40,29 @@ export function MapboxMap({
     if (!mapContainer.current) return;
 
     try {
-      console.log('Initializing map with token:', mapboxgl.accessToken.substring(0, 10) + '...');
-
-      map.current = new mapboxgl.Map({
-        container: mapContainer.current,
-        style: 'mapbox://styles/mapbox/light-v11', // Using a simpler style
+      console.log('Initializing Mapbox with configuration:', {
         center,
         zoom,
-        accessToken: mapboxgl.accessToken, // Explicitly set the token
+        token: token.substring(0, 10) + '...',
       });
 
+      // Create new map instance
+      map.current = new mapboxgl.Map({
+        container: mapContainer.current,
+        style: 'mapbox://styles/mapbox/light-v11',
+        center,
+        zoom,
+      });
+
+      // Add navigation controls
+      map.current.addControl(new mapboxgl.NavigationControl());
+
+      // Wait for map to load
       map.current.on('load', () => {
         console.log('Map loaded successfully');
+
         if (!readOnly && map.current) {
-          // Initialize the draw control
+          // Initialize drawing controls
           draw.current = new MapboxDraw({
             displayControlsDefault: false,
             controls: {
@@ -81,7 +93,7 @@ export function MapboxMap({
 
           map.current.addControl(draw.current);
 
-          // Event handlers for geofence changes
+          // Handle drawing events
           map.current.on('draw.create', () => {
             const data = draw.current?.getAll();
             onGeofenceChange?.(data);
@@ -115,7 +127,7 @@ export function MapboxMap({
     };
   }, []);
 
-  // Update the drawn geofence when prop changes
+  // Update geofence when prop changes
   useEffect(() => {
     if (!draw.current || !geofence) return;
     draw.current.set(geofence);
