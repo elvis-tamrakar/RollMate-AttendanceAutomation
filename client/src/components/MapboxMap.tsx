@@ -4,14 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 const mapboxgl = (window as any).mapboxgl;
 const MapboxDraw = (window as any).MapboxDraw;
 
-// Ensure token is set before any initialization
-const token = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
-if (!token) {
-  console.error('Mapbox token is missing from environment variables');
-  throw new Error('Mapbox token is required');
-}
-
-// Set the token
+// Set the Mapbox token directly
+const token = "pk.eyJ1IjoicmlqYW5ndXJ1bmciLCJhIjoiY204OHdwOXQ1MDZkMzJsb2xzNDh0M3ppeSJ9.03dxAfTKuFoj5-SMq9t6wg";
 mapboxgl.accessToken = token;
 
 const GEOFENCE_RADIUS = 500; // meters
@@ -107,13 +101,6 @@ export function MapboxMap({
       }
     };
   }, []);
-
-  // Update geofence when prop changes
-  useEffect(() => {
-    if (draw.current && geofence) {
-      draw.current.set(geofence);
-    }
-  }, [geofence]);
 
   if (error) {
     return (
