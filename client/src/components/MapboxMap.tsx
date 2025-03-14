@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Loader } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const SAULT_COLLEGE_TORONTO = {
   lat: 43.65694,
@@ -28,6 +29,7 @@ export function MapboxMap({
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const circleRef = useRef<google.maps.Circle | null>(null);
+  const [isGeofenceEnabled, setIsGeofenceEnabled] = useState(true);
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -59,6 +61,7 @@ export function MapboxMap({
             strokeWeight: 2,
             strokeColor: '#4338ca',
             editable: false,
+            visible: isGeofenceEnabled,
           });
 
           circleRef.current = circle;
@@ -90,6 +93,7 @@ export function MapboxMap({
             strokeColor: '#4338ca',
             editable: false,
             radius: GEOFENCE_RADIUS,
+            visible: isGeofenceEnabled,
           },
         });
 
@@ -105,6 +109,7 @@ export function MapboxMap({
           // Set the radius to 500 meters
           circle.setRadius(GEOFENCE_RADIUS);
           circle.setEditable(false);
+          circle.setVisible(isGeofenceEnabled);
           circleRef.current = circle;
 
           // Notify parent component of geofence change
@@ -135,6 +140,7 @@ export function MapboxMap({
           strokeWeight: 2,
           strokeColor: '#4338ca',
           editable: false,
+          visible: isGeofenceEnabled,
         });
       }
 
@@ -143,7 +149,16 @@ export function MapboxMap({
       setError('Failed to initialize map. Please try again later.');
       setIsLoading(false);
     }
-  }, [center, zoom, readOnly, geofence, onGeofenceChange]);
+  }, [center, zoom, readOnly, geofence, onGeofenceChange, isGeofenceEnabled]);
+
+  // Toggle geofence visibility
+  const toggleGeofence = () => {
+    if (circleRef.current) {
+      const newState = !isGeofenceEnabled;
+      circleRef.current.setVisible(newState);
+      setIsGeofenceEnabled(newState);
+    }
+  };
 
   if (error) {
     return (
@@ -162,22 +177,35 @@ export function MapboxMap({
   }
 
   return (
-    <div className="relative">
-      <div 
-        ref={mapRef} 
-        className="w-full h-[400px] rounded-lg border"
-      />
-
-      {isLoading && (
-        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm rounded-lg flex items-center justify-center">
-          <div className="text-center">
-            <Loader className="h-8 w-8 animate-spin text-primary mx-auto mb-2" />
-            <p className="text-sm text-muted-foreground animate-pulse">
-              Initializing map...
-            </p>
-          </div>
+    <div className="space-y-4">
+      {!readOnly && (
+        <div className="flex justify-end">
+          <Button
+            variant={isGeofenceEnabled ? "default" : "outline"}
+            onClick={toggleGeofence}
+          >
+            {isGeofenceEnabled ? 'Disable Geofence' : 'Enable Geofence'}
+          </Button>
         </div>
       )}
+
+      <div className="relative">
+        <div 
+          ref={mapRef} 
+          className="w-full h-[400px] rounded-lg border"
+        />
+
+        {isLoading && (
+          <div className="absolute inset-0 bg-white/80 backdrop-blur-sm rounded-lg flex items-center justify-center">
+            <div className="text-center">
+              <Loader className="h-8 w-8 animate-spin text-primary mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground animate-pulse">
+                Initializing map...
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
