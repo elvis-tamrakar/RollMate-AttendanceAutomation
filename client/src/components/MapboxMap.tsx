@@ -25,8 +25,8 @@ interface MapboxMapProps {
 }
 
 export function MapboxMap({
-  center = [-79.3832, 43.6532], // Default to Toronto coordinates
-  zoom = 11, // Slightly zoomed in for better city view
+  center = [-79.3832, 43.6532], // Toronto coordinates
+  zoom = 11,
   geofence,
   onGeofenceChange,
   readOnly = false,
@@ -43,16 +43,13 @@ export function MapboxMap({
       // Create new map instance
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
-        style: 'mapbox://styles/mapbox/streets-v12',
+        style: 'mapbox://styles/mapbox/streets-v11',
         center,
         zoom,
         attributionControl: false,
       });
 
-      // Add attribution control
-      map.current.addControl(new mapboxgl.AttributionControl(), 'bottom-right');
-
-      // Add navigation controls
+      // Add basic controls
       map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
       // Error handling
@@ -63,6 +60,8 @@ export function MapboxMap({
 
       // Initialize drawing tools after map loads
       map.current.on('load', () => {
+        console.log('Map loaded successfully');
+
         if (!readOnly && MapboxDraw) {
           draw.current = new MapboxDraw({
             displayControlsDefault: false,
@@ -74,26 +73,26 @@ export function MapboxMap({
 
           map.current.addControl(draw.current);
 
-          // Event handlers for geofence changes
-          map.current.on('draw.create', () => {
-            const data = draw.current.getAll();
-            onGeofenceChange?.(data);
-          });
-
-          map.current.on('draw.delete', () => {
-            const data = draw.current.getAll();
-            onGeofenceChange?.(data);
-          });
-
-          map.current.on('draw.update', () => {
-            const data = draw.current.getAll();
-            onGeofenceChange?.(data);
-          });
-
           // Set initial geofence if provided
           if (geofence) {
             draw.current.set(geofence);
           }
+
+          // Event handlers for geofence changes
+          map.current.on('draw.create', () => {
+            const data = draw.current?.getAll();
+            onGeofenceChange?.(data);
+          });
+
+          map.current.on('draw.delete', () => {
+            const data = draw.current?.getAll();
+            onGeofenceChange?.(data);
+          });
+
+          map.current.on('draw.update', () => {
+            const data = draw.current?.getAll();
+            onGeofenceChange?.(data);
+          });
         }
       });
 
