@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { Loader } from 'lucide-react';
 
-const TORONTO_CENTER = {
-  lat: 43.6532,
-  lng: -79.3832
+const SAULT_COLLEGE_TORONTO = {
+  lat: 43.65694,
+  lng: -79.452217
 };
 
-const INITIAL_ZOOM = 11;
+const INITIAL_ZOOM = 15; // Increased zoom for better visibility of the geofence
 const GEOFENCE_RADIUS = 500; // meters
 
 interface MapProps {
@@ -18,7 +18,7 @@ interface MapProps {
 }
 
 export function MapboxMap({
-  center = TORONTO_CENTER,
+  center = SAULT_COLLEGE_TORONTO,
   zoom = INITIAL_ZOOM,
   geofence,
   onGeofenceChange,
@@ -47,12 +47,37 @@ export function MapboxMap({
       google.maps.event.addListenerOnce(map, 'tilesloaded', () => {
         console.log('Map tiles loaded successfully');
         setIsLoading(false);
+
+        // Automatically create the geofence when map loads
+        if (!readOnly && !circleRef.current) {
+          const circle = new google.maps.Circle({
+            map,
+            center: SAULT_COLLEGE_TORONTO,
+            radius: GEOFENCE_RADIUS,
+            fillColor: '#4338ca',
+            fillOpacity: 0.2,
+            strokeWeight: 2,
+            strokeColor: '#4338ca',
+            editable: false,
+          });
+
+          circleRef.current = circle;
+
+          // Notify parent component of geofence
+          if (onGeofenceChange) {
+            const geofenceData = {
+              center: SAULT_COLLEGE_TORONTO,
+              radius: GEOFENCE_RADIUS,
+            };
+            onGeofenceChange(geofenceData);
+          }
+        }
       });
 
       // Add drawing manager if not in readonly mode
       if (!readOnly) {
         const drawingManager = new google.maps.drawing.DrawingManager({
-          drawingMode: google.maps.drawing.OverlayType.CIRCLE,
+          drawingMode: null, // Don't start in drawing mode
           drawingControl: true,
           drawingControlOptions: {
             position: google.maps.ControlPosition.TOP_CENTER,
@@ -64,7 +89,7 @@ export function MapboxMap({
             strokeWeight: 2,
             strokeColor: '#4338ca',
             editable: false,
-            radius: GEOFENCE_RADIUS, // Set fixed radius of 500 meters
+            radius: GEOFENCE_RADIUS,
           },
         });
 
