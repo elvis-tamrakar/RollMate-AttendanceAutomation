@@ -74,7 +74,7 @@ export default function Login() {
         <CardHeader className="space-y-2 text-center">
           <div className="flex justify-center mb-2">
             <img 
-              src="attached_assets/Rollmate.jpg" 
+              src="/Rollmate.jpg" 
               alt="RollMate Logo" 
               className="h-32 w-auto object-contain"
             />
