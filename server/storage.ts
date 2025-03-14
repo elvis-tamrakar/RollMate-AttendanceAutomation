@@ -1,9 +1,8 @@
 import { 
   Class, InsertClass, 
-  Student, InsertStudent,
-  Attendance, InsertAttendance,
   User, InsertUser,
-  Event, InsertEvent
+  Event, InsertEvent,
+  Attendance, InsertAttendance
 } from "@shared/schema";
 
 export interface IStorage {
@@ -17,15 +16,16 @@ export interface IStorage {
   getClass(id: number): Promise<Class | undefined>;
   createClass(data: InsertClass): Promise<Class>;
   updateClass(id: number, data: Partial<InsertClass>): Promise<Class>;
+  deleteClass(id: number): Promise<void>;
 
   // Events
   getEvents(classId?: number): Promise<Event[]>;
   createEvent(data: InsertEvent): Promise<Event>;
 
   // Students
-  getStudents(classId?: number): Promise<Student[]>;
-  getStudent(id: number): Promise<Student | undefined>;
-  createStudent(data: InsertStudent): Promise<Student>;
+  getStudents(classId?: number): Promise<User[]>;
+  getStudent(id: number): Promise<User | undefined>;
+  createStudent(data: InsertUser): Promise<User>;
   deleteStudent(id: number): Promise<void>;
 
   // Attendance
@@ -39,7 +39,6 @@ export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private classes: Map<number, Class>;
   private events: Map<number, Event>;
-  private students: Map<number, Student>;
   private attendance: Map<number, Attendance>;
   private currentIds: { [key: string]: number };
 
@@ -47,12 +46,11 @@ export class MemStorage implements IStorage {
     this.users = new Map();
     this.classes = new Map();
     this.events = new Map();
-    this.students = new Map();
     this.attendance = new Map();
-    this.currentIds = { users: 1, classes: 1, events: 1, students: 1, attendance: 1 };
+    this.currentIds = { users: 1, classes: 1, events: 1, attendance: 1 };
 
-    // Adding test users
-    const testTeacher = {
+    // Adding test teacher
+    const testTeacher: User = {
       id: this.currentIds.users++,
       name: "John Smith",
       email: "teacher@example.com",
@@ -61,49 +59,43 @@ export class MemStorage implements IStorage {
     };
     this.users.set(testTeacher.id, testTeacher);
 
-    // Adding test students
-    const students = [
-      { name: "Rijan Gurung", email: "rijan@example.com" },
-      { name: "Karunal Dahal", email: "karunal@example.com" },
-      { name: "Elvis Tamakar", email: "elvis@example.com" },
-      { name: "Suren Rajbanshi", email: "suren@example.com" },
-      { name: "Divya", email: "divya@example.com" }
-    ];
-
-    // Adding test classes
+    // Create test classes first
     const classes = [
       { name: "10 A", teacherId: testTeacher.id },
       { name: "10 B", teacherId: testTeacher.id },
       { name: "11 A", teacherId: testTeacher.id },
-      { name: "11 B", teacherId: testTeacher.id },
-      { name: "12 A", teacherId: testTeacher.id },
-      { name: "12 B", teacherId: testTeacher.id }
-    ];
-
-    // Create classes
-    classes.forEach((cls) => {
+    ].map(cls => {
       const id = this.currentIds.classes++;
-      this.classes.set(id, {
+      const newClass: Class = {
         id,
         name: cls.name,
         description: `Class ${cls.name}`,
         teacherId: cls.teacherId,
         schedule: [],
         geofence: null
-      });
+      };
+      this.classes.set(id, newClass);
+      return newClass;
     });
 
-    // Distribute students across classes
-    const classIds = Array.from(this.classes.values()).map(c => c.id);
-    students.forEach((student, index) => {
+    // Adding test students
+    const students = [
+      { name: "Rijan Gurung", email: "student@example.com", classId: classes[0].id },
+      { name: "Karunal Dahal", email: "karunal@example.com", classId: classes[0].id },
+      { name: "Elvis Tamakar", email: "elvis@example.com", classId: classes[1].id },
+      { name: "Suren Rajbanshi", email: "suren@example.com", classId: classes[1].id },
+      { name: "Divya", email: "divya@example.com", classId: classes[2].id }
+    ];
+
+    // Add students to users map
+    students.forEach(student => {
       const id = this.currentIds.users++;
-      const classId = classIds[index % classIds.length];
-      const newStudent = {
+      const newStudent: User = {
         id,
         name: student.name,
         email: student.email,
         role: "student",
-        classId
+        classId: student.classId
       };
       this.users.set(id, newStudent);
     });
@@ -120,7 +112,7 @@ export class MemStorage implements IStorage {
 
   async createUser(data: InsertUser): Promise<User> {
     const id = this.currentIds.users++;
-    const newUser = { ...data, id };
+    const newUser: User = { ...data, id };
     this.users.set(id, newUser);
     return newUser;
   }
@@ -136,11 +128,7 @@ export class MemStorage implements IStorage {
 
   async createClass(data: InsertClass): Promise<Class> {
     const id = this.currentIds.classes++;
-    const newClass: Class = { 
-      ...data, 
-      id,
-      description: data.description ?? null 
-    };
+    const newClass: Class = { ...data, id };
     this.classes.set(id, newClass);
     return newClass;
   }
@@ -149,13 +137,13 @@ export class MemStorage implements IStorage {
     const existing = this.classes.get(id);
     if (!existing) throw new Error("Class not found");
 
-    const updated: Class = { 
-      ...existing, 
-      ...data,
-      description: data.description ?? existing.description 
-    };
+    const updated: Class = { ...existing, ...data };
     this.classes.set(id, updated);
     return updated;
+  }
+
+  async deleteClass(id: number): Promise<void> {
+    this.classes.delete(id);
   }
 
   // Events
@@ -169,37 +157,31 @@ export class MemStorage implements IStorage {
 
   async createEvent(data: InsertEvent): Promise<Event> {
     const id = this.currentIds.events++;
-    const newEvent: Event = { 
-      ...data, 
-      id,
-      description: data.description ?? null 
-    };
+    const newEvent: Event = { ...data, id };
     this.events.set(id, newEvent);
     return newEvent;
   }
 
   // Students
-  async getStudents(classId?: number): Promise<Student[]> {
-    const students = Array.from(this.students.values());
+  async getStudents(classId?: number): Promise<User[]> {
+    const students = Array.from(this.users.values()).filter(u => u.role === "student");
     if (classId) {
       return students.filter(s => s.classId === classId);
     }
     return students;
   }
 
-  async getStudent(id: number): Promise<Student | undefined> {
-    return this.students.get(id);
+  async getStudent(id: number): Promise<User | undefined> {
+    const user = await this.getUser(id);
+    return user?.role === "student" ? user : undefined;
   }
 
-  async createStudent(data: InsertStudent): Promise<Student> {
-    const id = this.currentIds.students++;
-    const newStudent = { ...data, id };
-    this.students.set(id, newStudent);
-    return newStudent;
+  async createStudent(data: InsertUser): Promise<User> {
+    return this.createUser({ ...data, role: "student" });
   }
 
   async deleteStudent(id: number): Promise<void> {
-    this.students.delete(id);
+    this.users.delete(id);
   }
 
   // Attendance
@@ -218,11 +200,7 @@ export class MemStorage implements IStorage {
 
   async createAttendance(data: InsertAttendance): Promise<Attendance> {
     const id = this.currentIds.attendance++;
-    const newAttendance: Attendance = { 
-      ...data, 
-      id,
-      note: data.note ?? null 
-    };
+    const newAttendance: Attendance = { ...data, id };
     this.attendance.set(id, newAttendance);
     return newAttendance;
   }
@@ -231,11 +209,7 @@ export class MemStorage implements IStorage {
     const existing = this.attendance.get(id);
     if (!existing) throw new Error("Attendance record not found");
 
-    const updated: Attendance = { 
-      ...existing,
-      ...data,
-      note: data.note ?? existing.note
-    };
+    const updated: Attendance = { ...existing, ...data };
     this.attendance.set(id, updated);
     return updated;
   }
