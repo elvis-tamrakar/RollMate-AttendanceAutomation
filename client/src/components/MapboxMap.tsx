@@ -7,6 +7,7 @@ const TORONTO_CENTER = {
 };
 
 const INITIAL_ZOOM = 11;
+const GEOFENCE_RADIUS = 500; // meters
 
 interface MapProps {
   center?: { lat: number; lng: number };
@@ -26,6 +27,7 @@ export function MapboxMap({
   const mapRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const circleRef = useRef<google.maps.Circle | null>(null);
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -50,25 +52,73 @@ export function MapboxMap({
       // Add drawing manager if not in readonly mode
       if (!readOnly) {
         const drawingManager = new google.maps.drawing.DrawingManager({
-          drawingMode: null,
+          drawingMode: google.maps.drawing.OverlayType.CIRCLE,
           drawingControl: true,
           drawingControlOptions: {
             position: google.maps.ControlPosition.TOP_CENTER,
-            drawingModes: [
-              google.maps.drawing.OverlayType.POLYGON,
-              google.maps.drawing.OverlayType.CIRCLE,
-            ],
+            drawingModes: [google.maps.drawing.OverlayType.CIRCLE],
+          },
+          circleOptions: {
+            fillColor: '#4338ca',
+            fillOpacity: 0.2,
+            strokeWeight: 2,
+            strokeColor: '#4338ca',
+            editable: false,
+            radius: GEOFENCE_RADIUS, // Set fixed radius of 500 meters
           },
         });
 
         drawingManager.setMap(map);
+
+        // Handle circle creation
+        google.maps.event.addListener(drawingManager, 'circlecomplete', (circle: google.maps.Circle) => {
+          // Remove any existing circle
+          if (circleRef.current) {
+            circleRef.current.setMap(null);
+          }
+
+          // Set the radius to 500 meters
+          circle.setRadius(GEOFENCE_RADIUS);
+          circle.setEditable(false);
+          circleRef.current = circle;
+
+          // Notify parent component of geofence change
+          if (onGeofenceChange) {
+            const geofenceData = {
+              center: {
+                lat: circle.getCenter()?.lat() || 0,
+                lng: circle.getCenter()?.lng() || 0,
+              },
+              radius: GEOFENCE_RADIUS,
+            };
+            onGeofenceChange(geofenceData);
+          }
+
+          // Disable drawing mode after creating a circle
+          drawingManager.setDrawingMode(null);
+        });
       }
+
+      // If geofence data exists, display it
+      if (geofence && !circleRef.current) {
+        circleRef.current = new google.maps.Circle({
+          map,
+          center: geofence.center,
+          radius: GEOFENCE_RADIUS,
+          fillColor: '#4338ca',
+          fillOpacity: 0.2,
+          strokeWeight: 2,
+          strokeColor: '#4338ca',
+          editable: false,
+        });
+      }
+
     } catch (err) {
       console.error('Error initializing map:', err);
       setError('Failed to initialize map. Please try again later.');
       setIsLoading(false);
     }
-  }, [center, zoom, readOnly]);
+  }, [center, zoom, readOnly, geofence, onGeofenceChange]);
 
   if (error) {
     return (
