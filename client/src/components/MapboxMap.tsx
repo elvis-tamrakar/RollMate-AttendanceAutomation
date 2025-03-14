@@ -16,6 +16,8 @@ interface MapProps {
   readOnly?: boolean;
 }
 
+const libraries: ("drawing" | "geometry" | "localContext" | "places" | "visualization")[] = ["drawing"];
+
 export function MapboxMap({
   center = TORONTO_CENTER,
   zoom = INITIAL_ZOOM,
@@ -53,6 +55,7 @@ export function MapboxMap({
   return (
     <LoadScript
       googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ''}
+      libraries={libraries}
       loadingElement={
         <div className="w-full h-[400px] rounded-lg border bg-gray-50 flex items-center justify-center">
           <p className="text-muted-foreground">Loading map...</p>
@@ -77,10 +80,10 @@ export function MapboxMap({
             options={{
               drawingControl: true,
               drawingControlOptions: {
-                position: google.maps.ControlPosition.TOP_CENTER,
+                position: window.google?.maps?.ControlPosition?.TOP_CENTER,
                 drawingModes: [
-                  google.maps.drawing.OverlayType.CIRCLE,
-                  google.maps.drawing.OverlayType.POLYGON,
+                  window.google?.maps?.drawing?.OverlayType?.CIRCLE,
+                  window.google?.maps?.drawing?.OverlayType?.POLYGON,
                 ],
               },
             }}
