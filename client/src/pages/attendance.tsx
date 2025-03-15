@@ -198,46 +198,51 @@ export default function AttendancePage() {
                               updateAttendance.mutate({
                                 id: record.id,
                                 status,
-                                note: record.note ?? undefined,
+                                note: record.note
                               });
                             } else {
                               markAttendance.mutate({
                                 studentId: student.id,
                                 status,
+                                note: ""
                               });
                             }
                           }}
                         >
-                          <SelectTrigger>
+                          <SelectTrigger className="w-[140px]">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="present">Present</SelectItem>
                             <SelectItem value="absent">Absent</SelectItem>
                             <SelectItem value="late">Late</SelectItem>
-                            <SelectItem value="left_early">Left Early</SelectItem>
+                            <SelectItem value="left_early">
+                              Left Early
+                            </SelectItem>
                           </SelectContent>
                         </Select>
                       </TableCell>
                       <TableCell>
                         <Input
                           value={record?.note ?? ""}
+                          placeholder="Add note"
+                          className="max-w-[200px]"
                           onChange={(e) => {
+                            const note = e.target.value;
                             if (record) {
                               updateAttendance.mutate({
                                 id: record.id,
                                 status: record.status,
-                                note: e.target.value,
+                                note
                               });
                             } else {
                               markAttendance.mutate({
                                 studentId: student.id,
                                 status: "absent",
-                                note: e.target.value,
+                                note
                               });
                             }
                           }}
-                          placeholder="Add note"
                         />
                       </TableCell>
                       <TableCell className="text-muted-foreground">

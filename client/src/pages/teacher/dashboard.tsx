@@ -23,6 +23,8 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Class, Event } from "@shared/schema";
 import { Clock, MapPin, Users, Calendar } from "lucide-react";
+import { ProfileCard } from "@/components/profile-card";
+import type { User } from "@shared/schema";
 
 export default function TeacherDashboard() {
   const [selectedClass, setSelectedClass] = useState<Class | null>(null);
@@ -34,6 +36,10 @@ export default function TeacherDashboard() {
 
   const { data: events, isLoading: loadingEvents } = useQuery<Event[]>({
     queryKey: ["/api/events"],
+  });
+
+  const { data: currentUser } = useQuery<User>({
+    queryKey: ["/api/auth/me"],
   });
 
   const updateGeofence = useMutation({
@@ -76,7 +82,11 @@ export default function TeacherDashboard() {
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Teacher Dashboard</h1>
-
+      {currentUser && (
+        <div className="mb-6">
+          <ProfileCard user={currentUser} />
+        </div>
+      )}
       <div className="grid gap-6 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

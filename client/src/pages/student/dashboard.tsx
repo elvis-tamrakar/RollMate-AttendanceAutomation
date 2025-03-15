@@ -25,6 +25,7 @@ import {
 } from 'recharts';
 import type { Event, Attendance, Class, User } from "@shared/schema";
 import { Calendar, Clock, MapPin, GraduationCap, BookOpen } from "lucide-react";
+import { ProfileCard } from "@/components/profile-card";
 
 export default function StudentDashboard() {
   const { data: currentUser } = useQuery<User>({
@@ -69,14 +70,13 @@ export default function StudentDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-start">
         <h1 className="text-3xl font-bold">Student Dashboard</h1>
-        <div className="text-right">
-          <h2 className="font-medium">{currentUser?.name}</h2>
-          <p className="text-sm text-muted-foreground">
-            Class: {myClass?.name}
-          </p>
-        </div>
+        {currentUser && (
+          <div className="w-[300px]">
+            <ProfileCard user={currentUser} />
+          </div>
+        )}
       </div>
 
       <div className="grid gap-6 md:grid-cols-4">
