@@ -66,7 +66,7 @@ export default function AttendancePage() {
       const res = await apiRequest("POST", "/api/attendance", {
         studentId,
         classId: selectedClass,
-        date: selectedDate,
+        date: selectedDate.toISOString(),
         status,
         note,
       });
@@ -122,6 +122,10 @@ export default function AttendancePage() {
     },
   });
 
+  if (loadingClasses || loadingStudents || loadingAttendance) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -132,25 +136,21 @@ export default function AttendancePage() {
         <div className="space-y-6">
           <div className="space-y-2">
             <label className="text-sm font-medium">Select Class</label>
-            {loadingClasses ? (
-              <Skeleton className="h-10 w-full" />
-            ) : (
-              <Select
-                value={selectedClass?.toString()}
-                onValueChange={(value) => setSelectedClass(Number(value))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a class" />
-                </SelectTrigger>
-                <SelectContent>
-                  {classes?.map((cls) => (
-                    <SelectItem key={cls.id} value={cls.id.toString()}>
-                      {cls.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
+            <Select
+              value={selectedClass?.toString()}
+              onValueChange={(value) => setSelectedClass(Number(value))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a class" />
+              </SelectTrigger>
+              <SelectContent>
+                {classes?.map((cls) => (
+                  <SelectItem key={cls.id} value={cls.id.toString()}>
+                    {cls.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">
@@ -165,11 +165,7 @@ export default function AttendancePage() {
         </div>
 
         <div className="border rounded-lg">
-          {loadingStudents || loadingAttendance ? (
-            <div className="p-8">
-              <Skeleton className="h-32 w-full" />
-            </div>
-          ) : !selectedClass ? (
+          {!selectedClass ? (
             <div className="p-8 text-center text-muted-foreground">
               Please select a class to mark attendance
             </div>
@@ -195,40 +191,38 @@ export default function AttendancePage() {
                       <TableCell>
                         <Select
                           value={record?.status || "absent"}
-                          onValueChange={(status) => {
+                          onValueChange={(newStatus) => {
                             if (record) {
                               updateAttendance.mutate({
                                 id: record.id,
-                                status,
+                                status: newStatus,
                                 note: record.note || "",
                               });
                             } else {
                               markAttendance.mutate({
                                 studentId: student.id,
-                                status,
+                                status: newStatus,
                                 note: "",
                               });
                             }
                           }}
                         >
-                          <SelectTrigger className="w-[140px]">
+                          <SelectTrigger>
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="present">Present</SelectItem>
                             <SelectItem value="absent">Absent</SelectItem>
                             <SelectItem value="late">Late</SelectItem>
-                            <SelectItem value="left_early">
-                              Left Early
-                            </SelectItem>
+                            <SelectItem value="left_early">Left Early</SelectItem>
                           </SelectContent>
                         </Select>
                       </TableCell>
                       <TableCell>
                         <Input
-                          value={record?.note || ""}
                           placeholder="Add note"
                           className="max-w-[200px]"
+                          value={record?.note || ""}
                           onChange={(e) => {
                             const newNote = e.target.value;
                             if (record) {
