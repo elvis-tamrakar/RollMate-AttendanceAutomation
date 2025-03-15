@@ -194,7 +194,7 @@ export default function AttendancePage() {
                       <TableCell>{student.name}</TableCell>
                       <TableCell>
                         <Select
-                          value={record?.status ?? "absent"}
+                          value={record?.status || "absent"}
                           onValueChange={(status) => {
                             if (record) {
                               updateAttendance.mutate({
@@ -230,18 +230,18 @@ export default function AttendancePage() {
                           placeholder="Add note"
                           className="max-w-[200px]"
                           onChange={(e) => {
-                            const note = e.target.value;
+                            const newNote = e.target.value;
                             if (record) {
                               updateAttendance.mutate({
                                 id: record.id,
                                 status: record.status,
-                                note
+                                note: newNote,
                               });
                             } else {
                               markAttendance.mutate({
                                 studentId: student.id,
                                 status: "absent",
-                                note
+                                note: newNote,
                               });
                             }
                           }}
