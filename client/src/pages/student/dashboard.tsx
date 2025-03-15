@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
+import { format, startOfYear, eachMonthOfInterval } from "date-fns";
 import { MapboxMap } from "@/components/MapboxMap";
 import {
   Card,
@@ -24,8 +24,39 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import type { Event, Attendance, Class, User } from "@shared/schema";
-import { Calendar, Clock, MapPin, GraduationCap, BookOpen } from "lucide-react";
+import { Calendar, Clock, MapPin, GraduationCap } from "lucide-react";
 import { ProfileCard } from "@/components/profile-card";
+import { motion } from "framer-motion";
+
+const SCHEDULE = [
+  { day: "Tuesday", time: "6:00 PM - 10:00 PM" },
+  { day: "Wednesday", time: "6:00 PM - 10:00 PM" },
+  { day: "Thursday", time: "6:00 PM - 10:00 PM" },
+  { day: "Friday", time: "6:00 PM - 10:00 PM" },
+];
+
+// Generate sample attendance data from Jan 2025
+const generateAttendanceData = () => {
+  const startDate = startOfYear(new Date(2025, 0, 1));
+  const months = eachMonthOfInterval({
+    start: startDate,
+    end: new Date(2025, 2, 15) // March 15, 2025
+  });
+
+  return months.map(month => {
+    const total = 16; // 4 days per week * 4 weeks
+    const present = Math.floor(total * 0.9); // 90% attendance
+    const late = Math.floor(total * 0.05);
+    const absent = total - present - late;
+
+    return {
+      month: format(month, 'MMM'),
+      present,
+      late,
+      absent
+    };
+  });
+};
 
 export default function StudentDashboard() {
   const { data: currentUser } = useQuery<User>({
@@ -37,49 +68,51 @@ export default function StudentDashboard() {
     enabled: !!currentUser?.classId,
   });
 
-  const { data: myAttendance } = useQuery<Attendance[]>({
-    queryKey: ["/api/attendance/my"],
-  });
-
-  const { data: events } = useQuery<Event[]>({
-    queryKey: ["/api/events", { classId: currentUser?.classId }],
-    enabled: !!currentUser?.classId,
-  });
+  const chartData = generateAttendanceData();
 
   const attendanceStats = {
-    present: myAttendance?.filter(a => a.status === "present").length ?? 0,
-    late: myAttendance?.filter(a => a.status === "late").length ?? 0,
-    absent: myAttendance?.filter(a => a.status === "absent").length ?? 0,
+    present: chartData.reduce((sum, month) => sum + month.present, 0),
+    late: chartData.reduce((sum, month) => sum + month.late, 0),
+    absent: chartData.reduce((sum, month) => sum + month.absent, 0),
   };
 
-  // Calculate attendance percentage
-  const totalDays = (attendanceStats.present + attendanceStats.late + attendanceStats.absent) || 1;
+  const totalDays = Object.values(attendanceStats).reduce((a, b) => a + b, 0);
   const attendancePercentage = ((attendanceStats.present + attendanceStats.late) / totalDays) * 100;
 
-  // Prepare data for attendance chart
-  const monthlyAttendance = myAttendance?.reduce((acc: any, curr) => {
-    const month = format(new Date(curr.date), 'MMM');
-    if (!acc[month]) {
-      acc[month] = { month, present: 0, late: 0, absent: 0 };
-    }
-    acc[month][curr.status]++;
-    return acc;
-  }, {});
-
-  const chartData = Object.values(monthlyAttendance || {});
-
   return (
-    <div className="space-y-6">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="space-y-6"
+    >
       <div className="flex justify-between items-start">
-        <h1 className="text-3xl font-bold">Student Dashboard</h1>
+        <motion.h1 
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2 }}
+          className="text-3xl font-bold"
+        >
+          Student Dashboard
+        </motion.h1>
         {currentUser && (
-          <div className="w-[300px]">
+          <motion.div 
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3 }}
+            className="w-[300px]"
+          >
             <ProfileCard user={currentUser} />
-          </div>
+          </motion.div>
         )}
       </div>
 
-      <div className="grid gap-6 md:grid-cols-4">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        className="grid gap-6 md:grid-cols-4"
+      >
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
@@ -147,13 +180,12 @@ export default function StudentDashboard() {
             </p>
           </CardContent>
         </Card>
-      </div>
+      </motion.div>
 
       <Tabs defaultValue="attendance">
-        <TabsList className="grid w-full grid-cols-3 lg:w-[400px]">
+        <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
           <TabsTrigger value="attendance">Attendance</TabsTrigger>
           <TabsTrigger value="schedule">Schedule</TabsTrigger>
-          <TabsTrigger value="location">Location</TabsTrigger>
         </TabsList>
 
         <TabsContent value="attendance" className="space-y-4">
@@ -180,51 +212,37 @@ export default function StudentDashboard() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="schedule" className="space-y-4">
+        <TabsContent value="schedule">
           <Card>
             <CardHeader>
               <CardTitle>Class Schedule</CardTitle>
               <CardDescription>
-                Your weekly class timetable and upcoming events
+                Your weekly class timetable
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {events
-                  ?.filter(e => new Date(e.dueDate) > new Date())
-                  .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
-                  .map((event) => (
-                    <div
-                      key={event.id}
-                      className="flex items-center justify-between p-4 border rounded-lg"
-                    >
-                      <div>
-                        <h3 className="font-medium">{event.title}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          {format(new Date(event.dueDate), "PPp")}
-                        </p>
-                        {event.description && (
-                          <p className="mt-1 text-sm">
-                            {event.description}
-                          </p>
-                        )}
-                      </div>
-                      {event.type === "assignment" ? (
-                        <div className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded">
-                          Assignment
-                        </div>
-                      ) : (
-                        <div className="px-2 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded">
-                          Event
-                        </div>
-                      )}
+                {SCHEDULE.map((item, index) => (
+                  <motion.div
+                    key={item.day}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="flex items-center justify-between p-4 border rounded-lg"
+                  >
+                    <div>
+                      <h3 className="font-medium">{item.day}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {item.time}
+                      </p>
                     </div>
-                  ))}
+                    <Clock className="h-4 w-4 text-muted-foreground" />
+                  </motion.div>
+                ))}
               </div>
             </CardContent>
           </Card>
         </TabsContent>
-
         <TabsContent value="location">
           <Card>
             <CardHeader>
@@ -253,6 +271,6 @@ export default function StudentDashboard() {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
+    </motion.div>
   );
 }

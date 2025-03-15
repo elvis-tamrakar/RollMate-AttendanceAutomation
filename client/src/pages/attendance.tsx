@@ -59,7 +59,7 @@ export default function AttendancePage() {
     }: {
       studentId: number;
       status: string;
-      note?: string;
+      note: string;
     }) => {
       if (!selectedClass) return;
 
@@ -97,7 +97,7 @@ export default function AttendancePage() {
     }: {
       id: number;
       status: string;
-      note?: string;
+      note: string;
     }) => {
       const res = await apiRequest("PATCH", `/api/attendance/${id}`, {
         status,
@@ -124,7 +124,9 @@ export default function AttendancePage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Attendance</h1>
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">Attendance</h1>
+      </div>
 
       <div className="grid gap-6 md:grid-cols-[300px_1fr]">
         <div className="space-y-6">
@@ -198,13 +200,13 @@ export default function AttendancePage() {
                               updateAttendance.mutate({
                                 id: record.id,
                                 status,
-                                note: record.note
+                                note: record.note || "",
                               });
                             } else {
                               markAttendance.mutate({
                                 studentId: student.id,
                                 status,
-                                note: ""
+                                note: "",
                               });
                             }
                           }}
@@ -224,7 +226,7 @@ export default function AttendancePage() {
                       </TableCell>
                       <TableCell>
                         <Input
-                          value={record?.note ?? ""}
+                          value={record?.note || ""}
                           placeholder="Add note"
                           className="max-w-[200px]"
                           onChange={(e) => {

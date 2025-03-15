@@ -52,7 +52,7 @@ export class MemStorage implements IStorage {
     // Adding test teacher
     const testTeacher: User = {
       id: this.currentIds.users++,
-      name: "John Smith",
+      name: "Shikha Jaryal",
       email: "teacher@example.com",
       role: "teacher",
       classId: null,

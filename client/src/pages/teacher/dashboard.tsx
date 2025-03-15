@@ -25,6 +25,7 @@ import type { Class, Event } from "@shared/schema";
 import { Clock, MapPin, Users, Calendar } from "lucide-react";
 import { ProfileCard } from "@/components/profile-card";
 import type { User } from "@shared/schema";
+import { motion } from "framer-motion";
 
 export default function TeacherDashboard() {
   const [selectedClass, setSelectedClass] = useState<Class | null>(null);
@@ -80,14 +81,39 @@ export default function TeacherDashboard() {
   }
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Teacher Dashboard</h1>
-      {currentUser && (
-        <div className="mb-6">
-          <ProfileCard user={currentUser} />
-        </div>
-      )}
-      <div className="grid gap-6 md:grid-cols-3">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="space-y-6"
+    >
+      <div className="flex justify-between items-start">
+        <motion.h1 
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2 }}
+          className="text-3xl font-bold"
+        >
+          Teacher Dashboard
+        </motion.h1>
+        {currentUser && (
+          <motion.div 
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3 }}
+            className="w-[300px]"
+          >
+            <ProfileCard user={currentUser} />
+          </motion.div>
+        )}
+      </div>
+
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        className="grid gap-6 md:grid-cols-3"
+      >
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
@@ -127,9 +153,14 @@ export default function TeacherDashboard() {
             </div>
           </CardContent>
         </Card>
-      </div>
+      </motion.div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+        className="grid gap-6 md:grid-cols-2"
+      >
         <Card>
           <CardHeader>
             <CardTitle>Class Geofencing</CardTitle>
@@ -158,7 +189,11 @@ export default function TeacherDashboard() {
             </div>
 
             {selectedClass && (
-              <div className="space-y-4">
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-4"
+              >
                 <MapboxMap
                   geofence={selectedClass.geofence}
                   onGeofenceChange={(geofence) => {
@@ -172,7 +207,7 @@ export default function TeacherDashboard() {
                   Draw a polygon on the map to set the geofence boundary.
                   Students must be within this area during class hours to be marked present.
                 </p>
-              </div>
+              </motion.div>
             )}
           </CardContent>
         </Card>
@@ -248,9 +283,12 @@ export default function TeacherDashboard() {
               {events
                 ?.filter(e => new Date(e.dueDate) > new Date())
                 .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
-                .map((event) => (
-                  <div
+                .map((event, index) => (
+                  <motion.div
                     key={event.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
                     className="flex items-center justify-between p-4 border rounded-lg"
                   >
                     <div>
@@ -260,12 +298,12 @@ export default function TeacherDashboard() {
                       </p>
                     </div>
                     <Clock className="h-4 w-4 text-muted-foreground" />
-                  </div>
+                  </motion.div>
                 ))}
             </div>
           </CardContent>
         </Card>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
