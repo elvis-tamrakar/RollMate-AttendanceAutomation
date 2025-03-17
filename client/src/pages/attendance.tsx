@@ -22,7 +22,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Class, User, Attendance } from "@shared/schema";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Loader2 } from "lucide-react";
 
 export default function AttendancePage() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -38,9 +38,7 @@ export default function AttendancePage() {
     enabled: !!selectedClass,
   });
 
-  const { data: attendance, isLoading: loadingAttendance } = useQuery<
-    Attendance[]
-  >({
+  const { data: attendance, isLoading: loadingAttendance } = useQuery<Attendance[]>({
     queryKey: [
       "/api/attendance",
       {
@@ -61,7 +59,7 @@ export default function AttendancePage() {
       status: string;
       note: string;
     }) => {
-      if (!selectedClass) return;
+      if (!selectedClass) throw new Error("No class selected");
 
       const res = await apiRequest("POST", "/api/attendance", {
         studentId,
@@ -70,6 +68,11 @@ export default function AttendancePage() {
         status,
         note,
       });
+
+      if (!res.ok) {
+        throw new Error("Failed to mark attendance");
+      }
+
       return res.json();
     },
     onSuccess: () => {
@@ -85,6 +88,13 @@ export default function AttendancePage() {
       toast({
         title: "Success",
         description: "Attendance marked successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
       });
     },
   });
@@ -103,6 +113,11 @@ export default function AttendancePage() {
         status,
         note,
       });
+
+      if (!res.ok) {
+        throw new Error("Failed to update attendance");
+      }
+
       return res.json();
     },
     onSuccess: () => {
@@ -120,11 +135,17 @@ export default function AttendancePage() {
         description: "Attendance updated successfully",
       });
     },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
   });
 
-  if (loadingClasses || loadingStudents || loadingAttendance) {
-    return <div>Loading...</div>;
-  }
+  const isLoading = loadingClasses || loadingStudents || loadingAttendance;
+  const isMutating = markAttendance.isPending || updateAttendance.isPending;
 
   return (
     <div className="space-y-6">
@@ -139,6 +160,7 @@ export default function AttendancePage() {
             <Select
               value={selectedClass?.toString()}
               onValueChange={(value) => setSelectedClass(Number(value))}
+              disabled={isLoading || isMutating}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select a class" />
@@ -160,6 +182,7 @@ export default function AttendancePage() {
               selected={selectedDate}
               onSelect={(date) => date && setSelectedDate(date)}
               className="border rounded-md"
+              disabled={isLoading || isMutating}
             />
           </div>
         </div>
@@ -168,6 +191,11 @@ export default function AttendancePage() {
           {!selectedClass ? (
             <div className="p-8 text-center text-muted-foreground">
               Please select a class to mark attendance
+            </div>
+          ) : isLoading ? (
+            <div className="p-8 text-center">
+              <Loader2 className="h-6 w-6 animate-spin mx-auto" />
+              <p className="mt-2 text-muted-foreground">Loading attendance data...</p>
             </div>
           ) : (
             <Table>
@@ -206,8 +234,9 @@ export default function AttendancePage() {
                               });
                             }
                           }}
+                          disabled={isMutating}
                         >
-                          <SelectTrigger>
+                          <SelectTrigger className="w-[140px]">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -239,6 +268,7 @@ export default function AttendancePage() {
                               });
                             }
                           }}
+                          disabled={isMutating}
                         />
                       </TableCell>
                       <TableCell className="text-muted-foreground">
