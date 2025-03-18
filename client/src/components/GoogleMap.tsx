@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
 import { ToggleLeft, ToggleRight } from 'lucide-react';
 
 interface GoogleMapProps {
@@ -18,7 +19,9 @@ const SAULT_COLLEGE_TORONTO = {
   lng: -79.452217
 };
 
-const DEFAULT_GEOFENCE_RADIUS = 300; // 300 meters
+const MIN_RADIUS = 100; // 100 meters
+const MAX_RADIUS = 1000; // 1 kilometer
+const DEFAULT_RADIUS = 300; // 300 meters
 
 export function GoogleMap({ geofence, onGeofenceChange }: GoogleMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
@@ -26,7 +29,7 @@ export function GoogleMap({ geofence, onGeofenceChange }: GoogleMapProps) {
   const [drawingManager, setDrawingManager] = useState<google.maps.drawing.DrawingManager | null>(null);
   const [currentPolygon, setCurrentPolygon] = useState<google.maps.Polygon | null>(null);
   const [isGeofenceEnabled, setIsGeofenceEnabled] = useState(true);
-  const [isDrawingMode, setIsDrawingMode] = useState(false);
+  const [radius, setRadius] = useState(DEFAULT_RADIUS);
 
   // Helper function to create a circle of points
   const createCirclePoints = (center: { lat: number; lng: number }, radius: number, numPoints = 32) => {
@@ -39,6 +42,13 @@ export function GoogleMap({ geofence, onGeofenceChange }: GoogleMapProps) {
     }
     points.push(points[0]); // Close the circle
     return points;
+  };
+
+  // Update geofence when radius changes
+  const updateGeofenceRadius = (newRadius: number) => {
+    setRadius(newRadius);
+    const circlePoints = createCirclePoints(SAULT_COLLEGE_TORONTO, newRadius);
+    onGeofenceChange({ type: 'Polygon', coordinates: [circlePoints] });
   };
 
   useEffect(() => {
@@ -64,75 +74,17 @@ export function GoogleMap({ geofence, onGeofenceChange }: GoogleMapProps) {
         ]
       });
 
-      console.log('Map instance created successfully');
-
-      // Initialize drawing manager with more visible controls
-      const drawingManagerInstance = new google.maps.drawing.DrawingManager({
-        drawingMode: null,
-        drawingControl: true,
-        drawingControlOptions: {
-          position: google.maps.ControlPosition.TOP_CENTER,
-          drawingModes: [google.maps.drawing.OverlayType.POLYGON]
-        },
-        polygonOptions: {
-          fillColor: '#4338ca',
-          fillOpacity: 0.3,
-          strokeWeight: 3,
-          strokeColor: '#4338ca',
-          editable: true,
-          draggable: true,
-          // Make the editing handles larger
-          zIndex: 1,
-          clickable: true
-        }
+      // Add a marker for Sault College
+      new google.maps.Marker({
+        position: SAULT_COLLEGE_TORONTO,
+        map: mapInstance,
+        title: "Sault College Toronto Campus",
+        animation: google.maps.Animation.DROP
       });
 
-      drawingManagerInstance.setMap(mapInstance);
       setMap(mapInstance);
-      setDrawingManager(drawingManagerInstance);
 
-      // Add drawing mode listener
-      google.maps.event.addListener(drawingManagerInstance, 'drawingmode_changed', () => {
-        setIsDrawingMode(!!drawingManagerInstance.getDrawingMode());
-      });
-
-      // Add drawing completion listener
-      google.maps.event.addListener(drawingManagerInstance, 'polygoncomplete', (polygon) => {
-        if (currentPolygon) {
-          currentPolygon.setMap(null);
-        }
-        setCurrentPolygon(polygon);
-
-        // Convert polygon to geofence format
-        const path = polygon.getPath();
-        const coordinates = Array.from({ length: path.getLength() }, (_, i) => {
-          const point = path.getAt(i);
-          return [point.lng(), point.lat()];
-        });
-        onGeofenceChange({ type: 'Polygon', coordinates: [coordinates] });
-
-        // Add path change listeners
-        google.maps.event.addListener(path, 'set_at', () => {
-          const updatedCoordinates = Array.from({ length: path.getLength() }, (_, i) => {
-            const point = path.getAt(i);
-            return [point.lng(), point.lat()];
-          });
-          onGeofenceChange({ type: 'Polygon', coordinates: [updatedCoordinates] });
-        });
-
-        google.maps.event.addListener(path, 'insert_at', () => {
-          const updatedCoordinates = Array.from({ length: path.getLength() }, (_, i) => {
-            const point = path.getAt(i);
-            return [point.lng(), point.lat()];
-          });
-          onGeofenceChange({ type: 'Polygon', coordinates: [updatedCoordinates] });
-        });
-
-        // Exit drawing mode after completion
-        drawingManagerInstance.setDrawingMode(null);
-      });
-
-      console.log('Drawing manager initialized successfully');
+      console.log('Map instance created successfully');
     } catch (error) {
       console.error('Error initializing map:', error);
     }
@@ -154,7 +106,7 @@ export function GoogleMap({ geofence, onGeofenceChange }: GoogleMapProps) {
       }));
     } else {
       // Create default circular geofence
-      const circlePoints = createCirclePoints(SAULT_COLLEGE_TORONTO, DEFAULT_GEOFENCE_RADIUS);
+      const circlePoints = createCirclePoints(SAULT_COLLEGE_TORONTO, radius);
       polygonPath = circlePoints.map(([lng, lat]) => ({ lat, lng }));
       // Set the initial geofence
       onGeofenceChange({ type: 'Polygon', coordinates: [circlePoints] });
@@ -166,35 +118,16 @@ export function GoogleMap({ geofence, onGeofenceChange }: GoogleMapProps) {
       fillOpacity: 0.3,
       strokeWeight: 3,
       strokeColor: '#4338ca',
-      editable: true,
-      draggable: true,
+      editable: false,
+      draggable: false,
       visible: isGeofenceEnabled,
-      // Make the editing handles larger
       zIndex: 1,
       clickable: true
     });
 
     polygon.setMap(map);
     setCurrentPolygon(polygon);
-
-    // Add path change listeners
-    const path = polygon.getPath();
-    google.maps.event.addListener(path, 'set_at', () => {
-      const updatedCoordinates = Array.from({ length: path.getLength() }, (_, i) => {
-        const point = path.getAt(i);
-        return [point.lng(), point.lat()];
-      });
-      onGeofenceChange({ type: 'Polygon', coordinates: [updatedCoordinates] });
-    });
-
-    google.maps.event.addListener(path, 'insert_at', () => {
-      const updatedCoordinates = Array.from({ length: path.getLength() }, (_, i) => {
-        const point = path.getAt(i);
-        return [point.lng(), point.lat()];
-      });
-      onGeofenceChange({ type: 'Polygon', coordinates: [updatedCoordinates] });
-    });
-  }, [map, geofence, isGeofenceEnabled]);
+  }, [map, geofence, isGeofenceEnabled, radius]);
 
   const toggleGeofence = () => {
     setIsGeofenceEnabled(!isGeofenceEnabled);
@@ -230,16 +163,27 @@ export function GoogleMap({ geofence, onGeofenceChange }: GoogleMapProps) {
         </span>
       </div>
 
+      <div className="space-y-2">
+        <div className="flex justify-between">
+          <label className="text-sm font-medium">Geofence Radius</label>
+          <span className="text-sm text-muted-foreground">{radius} meters</span>
+        </div>
+        <Slider
+          value={[radius]}
+          onValueChange={([value]) => updateGeofenceRadius(value)}
+          min={MIN_RADIUS}
+          max={MAX_RADIUS}
+          step={50}
+          className="w-full"
+        />
+        <div className="flex justify-between text-xs text-muted-foreground">
+          <span>100m</span>
+          <span>1km</span>
+        </div>
+      </div>
+
       <div className="relative">
         <div ref={mapRef} className="w-full h-[400px] rounded-lg border" />
-
-        {isDrawingMode && (
-          <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-white px-4 py-2 rounded-full shadow-lg">
-            <p className="text-sm font-medium text-primary">
-              Click on the map to draw geofence boundary
-            </p>
-          </div>
-        )}
       </div>
 
       <div className="space-y-2">
@@ -249,13 +193,7 @@ export function GoogleMap({ geofence, onGeofenceChange }: GoogleMapProps) {
             : "Geofence is disabled. Attendance must be marked manually."}
         </p>
         <p className="text-sm text-muted-foreground">
-          To modify the geofence area:
-          <ul className="list-disc pl-5 mt-1 space-y-1">
-            <li>Click the polygon icon in the top center to start drawing</li>
-            <li>Click on the map to create boundary points</li>
-            <li>Close the shape by clicking the first point</li>
-            <li>Drag the white squares to adjust the boundary</li>
-          </ul>
+          Adjust the radius slider above to increase or decrease the geofence area around Sault College Toronto Campus.
         </p>
       </div>
     </div>
