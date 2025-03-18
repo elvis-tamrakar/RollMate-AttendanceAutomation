@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { MapboxMap } from "@/components/MapboxMap";
+import { GoogleMap } from "@/components/GoogleMap";
 import {
   Card,
   CardContent,
@@ -199,7 +199,7 @@ export default function TeacherDashboard() {
 
               {selectedClass && (
                 <div className="space-y-4">
-                  <MapboxMap
+                  <GoogleMap
                     geofence={selectedClass.geofence}
                     onGeofenceChange={(geofence) => {
                       updateGeofence.mutate({
