@@ -29,7 +29,6 @@ export const events = pgTable("events", {
   description: text("description"),
   dueDate: timestamp("due_date").notNull(),
   type: text("type").notNull(), // 'assignment' or 'event'
-  category: text("category").notNull(), // 'lecture', 'lab', 'exam', 'workshop', 'other'
   location: json("location").$type<{ buildingId: string; room?: string }>(), // Building ID and room info
 });
 
