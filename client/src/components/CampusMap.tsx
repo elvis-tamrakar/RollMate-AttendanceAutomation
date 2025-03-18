@@ -57,6 +57,7 @@ export function CampusMap({ className }: CampusMapProps) {
     if (!mapRef.current) return;
 
     try {
+      console.log('Initializing Google Maps...');
       setIsLoading(true);
       const mapInstance = new google.maps.Map(mapRef.current, {
         center: SAULT_COLLEGE_TORONTO,
@@ -75,11 +76,13 @@ export function CampusMap({ className }: CampusMapProps) {
         ]
       });
 
+      console.log('Map instance created successfully');
       setMap(mapInstance);
       setInfoWindow(new google.maps.InfoWindow());
 
       // Add campus buildings
       CAMPUS_BUILDINGS.forEach(building => {
+        console.log(`Creating marker for building: ${building.name}`);
         const marker = new google.maps.Marker({
           position: building.location,
           map: mapInstance,
@@ -99,9 +102,12 @@ export function CampusMap({ className }: CampusMapProps) {
             infoWindow.close();
 
             // Find events for this building
-            const buildingEvents = events?.filter(event => 
-              event.location?.buildingId === building.id
-            );
+            const buildingEvents = events?.filter(event => {
+              console.log('Event location:', event.location);
+              return event.location?.buildingId === building.id;
+            });
+
+            console.log(`Found ${buildingEvents?.length || 0} events for building: ${building.name}`);
 
             const eventsHtml = buildingEvents?.length 
               ? `<div class="mt-2">
@@ -127,6 +133,7 @@ export function CampusMap({ className }: CampusMapProps) {
       });
 
       setIsLoading(false);
+      console.log('Map initialization complete');
     } catch (error) {
       console.error('Error initializing map:', error);
       setIsLoading(false);
