@@ -75,17 +75,17 @@ app.use((req, res, next) => {
       serveStatic(app);
     }
 
-    // Use environment port or default to 3000
-    const port = process.env.PORT || 3000;
+    // Use environment port with fallback to 5000 (required by Replit)
+    const port = process.env.PORT || 5000;
 
     try {
-      // For local development, just listen on localhost
-      server.listen(port, () => {
+      // Listen on all network interfaces (0.0.0.0)
+      server.listen(port, "0.0.0.0", () => {
         console.log(`
 =================================
 Server is running!
 Development mode: ${app.get("env") === "development"}
-URL: http://localhost:${port}
+URL: http://0.0.0.0:${port}
 =================================
 `);
       });
