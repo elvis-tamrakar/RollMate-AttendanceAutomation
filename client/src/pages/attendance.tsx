@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { Container, Row, Col } from 'react-bootstrap';
 import { Calendar } from "@/components/ui/calendar";
 import {
   Table,
@@ -149,56 +148,54 @@ export default function AttendancePage() {
   const isMutating = markAttendance.isPending || updateAttendance.isPending;
 
   return (
-    <Container fluid className="space-y-6">
-      <div className="flex justify-between items-center fade-in-up">
+    <div className="p-6 space-y-6">
+      <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Attendance</h1>
       </div>
 
-      <Row className="g-4">
-        <Col md={3}>
-          <div className="space-y-6 bounce-in">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Select Class</label>
-              <Select
-                value={selectedClass?.toString()}
-                onValueChange={(value) => setSelectedClass(Number(value))}
-                disabled={isLoading || isMutating}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a class" />
-                </SelectTrigger>
-                <SelectContent>
-                  {classes?.map((cls) => (
-                    <SelectItem key={cls.id} value={cls.id.toString()}>
-                      {cls.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Select Date</label>
-              <Calendar
-                mode="single"
-                selected={selectedDate}
-                onSelect={(date) => date && setSelectedDate(date)}
-                className="border rounded-md"
-                disabled={isLoading || isMutating}
-              />
-            </div>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Select Class</label>
+            <Select
+              value={selectedClass?.toString()}
+              onValueChange={(value) => setSelectedClass(Number(value))}
+              disabled={isLoading || isMutating}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a class" />
+              </SelectTrigger>
+              <SelectContent>
+                {classes?.map((cls) => (
+                  <SelectItem key={cls.id} value={cls.id.toString()}>
+                    {cls.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-        </Col>
 
-        <Col md={9}>
-          <div className="border rounded-lg slide-in-right">
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Select Date</label>
+            <Calendar
+              mode="single"
+              selected={selectedDate}
+              onSelect={(date) => date && setSelectedDate(date)}
+              className="border rounded-md"
+              disabled={isLoading || isMutating}
+            />
+          </div>
+        </div>
+
+        <div className="col-span-3">
+          <div className="border rounded-lg">
             {!selectedClass ? (
               <div className="p-8 text-center text-muted-foreground">
                 Please select a class to mark attendance
               </div>
             ) : isLoading ? (
               <div className="p-8 text-center">
-                <Loader2 className="h-6 w-6 animate-spin mx-auto" />
+                <Loader2 className="h-6 w-6 mx-auto" />
                 <p className="mt-2 text-muted-foreground">Loading attendance data...</p>
               </div>
             ) : (
@@ -285,8 +282,8 @@ export default function AttendancePage() {
               </Table>
             )}
           </div>
-        </Col>
-      </Row>
-    </Container>
+        </div>
+      </div>
+    </div>
   );
 }
