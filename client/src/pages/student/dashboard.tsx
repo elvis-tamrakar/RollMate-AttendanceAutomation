@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { format, startOfYear, eachMonthOfInterval } from "date-fns";
 import { MapboxMap } from "@/components/MapboxMap";
-import { Container, Row, Col } from 'react-bootstrap';
 import {
   Card,
   CardContent,
@@ -87,133 +86,113 @@ export default function StudentDashboard() {
 
   return (
     <TooltipProvider>
-      <Container fluid className="space-y-6">
-        <Row className="mb-4 align-items-start">
-          <Col>
-            <h1 className="text-3xl font-bold fade-in-up">Student Dashboard</h1>
-          </Col>
+      <div className="p-6 space-y-6">
+        <div className="flex justify-between items-start mb-4">
+          <h1 className="text-3xl font-bold">Student Dashboard</h1>
           {currentUser && (
-            <Col xs="auto">
-              <div className="slide-in-right">
-                <ProfileCard user={currentUser} />
-              </div>
-            </Col>
+            <div>
+              <ProfileCard user={currentUser} />
+            </div>
           )}
-        </Row>
+        </div>
 
-        <Row className="g-4">
-          <Col md={3}>
-            <div className="bounce-in">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Card className="cursor-help">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">
-                        Attendance Rate
-                      </CardTitle>
-                      <GraduationCap className="h-4 w-4 text-blue-500" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold text-blue-600">
-                        {attendancePercentage.toFixed(1)}%
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        Overall attendance performance
-                      </p>
-                    </CardContent>
-                  </Card>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Your overall attendance rate including both present and late attendances</p>
-                </TooltipContent>
-              </Tooltip>
-            </div>
-          </Col>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Card className="cursor-help">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    Attendance Rate
+                  </CardTitle>
+                  <GraduationCap className="h-4 w-4 text-blue-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-blue-600">
+                    {attendancePercentage.toFixed(1)}%
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Overall attendance performance
+                  </p>
+                </CardContent>
+              </Card>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Your overall attendance rate including both present and late attendances</p>
+            </TooltipContent>
+          </Tooltip>
 
-          <Col md={3}>
-            <div className="bounce-in" style={{ animationDelay: '0.2s' }}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Card className="cursor-help">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">
-                        Present Days
-                      </CardTitle>
-                      <Calendar className="h-4 w-4 text-green-500" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold text-green-600">
-                        {attendanceStats.present}
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        Total days present
-                      </p>
-                    </CardContent>
-                  </Card>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Number of days you were present in class on time</p>
-                </TooltipContent>
-              </Tooltip>
-            </div>
-          </Col>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Card className="cursor-help">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    Present Days
+                  </CardTitle>
+                  <Calendar className="h-4 w-4 text-green-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-green-600">
+                    {attendanceStats.present}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Total days present
+                  </p>
+                </CardContent>
+              </Card>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Number of days you were present in class on time</p>
+            </TooltipContent>
+          </Tooltip>
 
-          <Col md={3}>
-            <div className="bounce-in" style={{ animationDelay: '0.4s' }}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Card className="cursor-help">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">
-                        Late Arrivals
-                      </CardTitle>
-                      <Clock className="h-4 w-4 text-yellow-500" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold text-yellow-600">
-                        {attendanceStats.late}
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        Days arrived late
-                      </p>
-                    </CardContent>
-                  </Card>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Number of days you arrived after the class start time</p>
-                </TooltipContent>
-              </Tooltip>
-            </div>
-          </Col>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Card className="cursor-help">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    Late Arrivals
+                  </CardTitle>
+                  <Clock className="h-4 w-4 text-yellow-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-yellow-600">
+                    {attendanceStats.late}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Days arrived late
+                  </p>
+                </CardContent>
+              </Card>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Number of days you arrived after the class start time</p>
+            </TooltipContent>
+          </Tooltip>
 
-          <Col md={3}>
-            <div className="bounce-in" style={{ animationDelay: '0.6s' }}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Card className="cursor-help">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">
-                        Absences
-                      </CardTitle>
-                      <Calendar className="h-4 w-4 text-red-500" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold text-red-600">
-                        {attendanceStats.absent}
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        Total days absent
-                      </p>
-                    </CardContent>
-                  </Card>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Number of days you were marked as absent from class</p>
-                </TooltipContent>
-              </Tooltip>
-            </div>
-          </Col>
-        </Row>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Card className="cursor-help">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    Absences
+                  </CardTitle>
+                  <Calendar className="h-4 w-4 text-red-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-red-600">
+                    {attendanceStats.absent}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Total days absent
+                  </p>
+                </CardContent>
+              </Card>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Number of days you were marked as absent from class</p>
+            </TooltipContent>
+          </Tooltip>
+        </div>
 
         <Tabs defaultValue="attendance">
           <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
@@ -275,11 +254,10 @@ export default function StudentDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {SCHEDULE.map((item, index) => (
+                  {SCHEDULE.map((item) => (
                     <div
                       key={item.day}
-                      className="flex items-center justify-between p-4 border rounded-lg fade-in-right"
-                      style={{ animationDelay: `${index * 0.1}s` }}
+                      className="flex items-center justify-between p-4 border rounded-lg"
                     >
                       <div>
                         <h3 className="font-medium">{item.day}</h3>
@@ -295,7 +273,7 @@ export default function StudentDashboard() {
             </Card>
           </TabsContent>
         </Tabs>
-      </Container>
+      </div>
     </TooltipProvider>
   );
 }
