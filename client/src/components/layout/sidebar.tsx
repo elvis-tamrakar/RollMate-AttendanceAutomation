@@ -7,7 +7,8 @@ import {
   GraduationCap,
   ClipboardCheck,
   Calendar,
-  BookOpen
+  BookOpen,
+  MapPin
 } from "lucide-react";
 import type { User } from "@shared/schema";
 
@@ -16,12 +17,14 @@ const teacherNavigation = [
   { name: "Classes", href: "/classes", icon: GraduationCap },
   { name: "Students", href: "/students", icon: Users },
   { name: "Attendance", href: "/attendance", icon: ClipboardCheck },
+  { name: "Campus Map", href: "/campus", icon: MapPin },
 ];
 
 const studentNavigation = [
   { name: "Dashboard", href: "/student", icon: LayoutDashboard },
   { name: "Schedule", href: "/student/schedule", icon: Calendar },
   { name: "Materials", href: "/student/materials", icon: BookOpen },
+  { name: "Campus Map", href: "/campus", icon: MapPin },
 ];
 
 export function Sidebar() {
