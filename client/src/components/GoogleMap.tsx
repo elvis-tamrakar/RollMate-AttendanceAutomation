@@ -186,23 +186,30 @@ export function GoogleMap({ geofence, onGeofenceChange }: GoogleMapProps) {
 
   return (
     <div className="space-y-4">
-      <Button 
-        variant="outline" 
-        onClick={toggleGeofence}
-        className="flex items-center gap-2"
-      >
-        {isGeofenceEnabled ? (
-          <>
-            <ToggleRight className="h-4 w-4" />
-            Disable Geofence
-          </>
-        ) : (
-          <>
-            <ToggleLeft className="h-4 w-4" />
-            Enable Geofence
-          </>
-        )}
-      </Button>
+      <div className="flex items-center gap-3">
+        <Button 
+          variant={isGeofenceEnabled ? "default" : "outline"}
+          onClick={toggleGeofence}
+          className="flex items-center gap-2 min-w-[160px]"
+        >
+          {isGeofenceEnabled ? (
+            <>
+              <ToggleRight className="h-4 w-4 text-white" />
+              <span>Geofence ON</span>
+              <div className="w-2 h-2 rounded-full bg-green-500 ml-2 animate-pulse" />
+            </>
+          ) : (
+            <>
+              <ToggleLeft className="h-4 w-4" />
+              <span>Geofence OFF</span>
+              <div className="w-2 h-2 rounded-full bg-gray-400 ml-2" />
+            </>
+          )}
+        </Button>
+        <span className="text-sm text-muted-foreground">
+          {isGeofenceEnabled ? "Automatic attendance tracking is active" : "Manual attendance marking required"}
+        </span>
+      </div>
       <div ref={mapRef} className="w-full h-[400px] rounded-lg border" />
       <p className="text-sm text-muted-foreground">
         {isGeofenceEnabled 
