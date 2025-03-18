@@ -5,6 +5,12 @@ interface GoogleMapProps {
   onGeofenceChange: (geofence: any) => void;
 }
 
+declare global {
+  interface Window {
+    google: typeof google;
+  }
+}
+
 export function GoogleMap({ geofence, onGeofenceChange }: GoogleMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
@@ -12,7 +18,7 @@ export function GoogleMap({ geofence, onGeofenceChange }: GoogleMapProps) {
   const [currentPolygon, setCurrentPolygon] = useState<google.maps.Polygon | null>(null);
 
   useEffect(() => {
-    if (!mapRef.current) return;
+    if (!mapRef.current || !window.google) return;
 
     // Initialize map
     const mapInstance = new google.maps.Map(mapRef.current, {
