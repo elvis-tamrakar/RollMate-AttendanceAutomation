@@ -36,6 +36,15 @@ const CAMPUS_BUILDINGS = [
   }
 ];
 
+// Event category colors
+const EVENT_COLORS = {
+  lecture: '#4338ca', // Indigo
+  lab: '#059669', // Emerald
+  exam: '#dc2626', // Red
+  workshop: '#d97706', // Amber
+  other: '#6b7280', // Gray
+};
+
 interface CampusMapProps {
   className?: string;
 }
@@ -83,6 +92,19 @@ export function CampusMap({ className }: CampusMapProps) {
       // Add campus buildings
       CAMPUS_BUILDINGS.forEach(building => {
         console.log(`Creating marker for building: ${building.name}`);
+        const buildingEvents = events?.filter(event => 
+          event.location?.buildingId === building.id
+        );
+
+        // Get the color based on the most imminent event's category
+        const mostImminentEvent = buildingEvents?.reduce((nearest, current) => {
+          return new Date(current.dueDate) < new Date(nearest.dueDate) ? current : nearest;
+        }, buildingEvents[0]);
+
+        const markerColor = mostImminentEvent 
+          ? EVENT_COLORS[mostImminentEvent.category as keyof typeof EVENT_COLORS] || EVENT_COLORS.other
+          : EVENT_COLORS.other;
+
         const marker = new google.maps.Marker({
           position: building.location,
           map: mapInstance,
@@ -90,10 +112,10 @@ export function CampusMap({ className }: CampusMapProps) {
           icon: {
             path: google.maps.SymbolPath.CIRCLE,
             scale: 10,
-            fillColor: '#4338ca',
+            fillColor: markerColor,
             fillOpacity: 0.7,
             strokeWeight: 2,
-            strokeColor: '#4338ca',
+            strokeColor: markerColor,
           }
         });
 
@@ -114,7 +136,9 @@ export function CampusMap({ className }: CampusMapProps) {
                   <strong>Current Events:</strong>
                   <ul class="list-disc pl-4">
                     ${buildingEvents.map(event => `
-                      <li>${event.title} - ${new Date(event.dueDate).toLocaleTimeString()}</li>
+                      <li style="color: ${EVENT_COLORS[event.category as keyof typeof EVENT_COLORS] || EVENT_COLORS.other}">
+                        ${event.title} (${event.category}) - ${new Date(event.dueDate).toLocaleTimeString()}
+                      </li>
                     `).join('')}
                   </ul>
                 </div>`
@@ -147,6 +171,17 @@ export function CampusMap({ className }: CampusMapProps) {
         <CardDescription>
           Interactive map showing campus buildings and current events
         </CardDescription>
+        <div className="flex flex-wrap gap-2 mt-2">
+          {Object.entries(EVENT_COLORS).map(([category, color]) => (
+            <div key={category} className="flex items-center gap-1">
+              <div 
+                className="w-3 h-3 rounded-full" 
+                style={{ backgroundColor: color }}
+              />
+              <span className="text-sm capitalize">{category}</span>
+            </div>
+          ))}
+        </div>
       </CardHeader>
       <CardContent>
         <div className="relative">
