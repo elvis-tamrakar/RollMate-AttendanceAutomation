@@ -8,7 +8,6 @@ import {
   ClipboardCheck,
   Calendar,
   BookOpen,
-  MapPin
 } from "lucide-react";
 import type { User } from "@shared/schema";
 
@@ -17,14 +16,12 @@ const teacherNavigation = [
   { name: "Classes", href: "/classes", icon: GraduationCap },
   { name: "Students", href: "/students", icon: Users },
   { name: "Attendance", href: "/attendance", icon: ClipboardCheck },
-  { name: "Campus Map", href: "/campus", icon: MapPin },
 ];
 
 const studentNavigation = [
   { name: "Dashboard", href: "/student", icon: LayoutDashboard },
   { name: "Schedule", href: "/student/schedule", icon: Calendar },
   { name: "Materials", href: "/student/materials", icon: BookOpen },
-  { name: "Campus Map", href: "/campus", icon: MapPin },
 ];
 
 export function Sidebar() {
@@ -38,20 +35,20 @@ export function Sidebar() {
   return (
     <div className="flex h-full flex-col bg-sidebar border-r">
       <div className="flex h-16 shrink-0 items-center px-6">
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent fade-in-up">
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
           RollMate
         </h1>
       </div>
       <nav className="flex flex-1 flex-col px-6 py-4">
         <ul role="list" className="flex flex-1 flex-col gap-y-4">
-          {navigation.map((item, index) => (
-            <li key={item.name} className="slide-in-right" style={{ animationDelay: `${index * 0.1}s` }}>
+          {navigation.map((item) => (
+            <li key={item.name}>
               <Link href={item.href}>
                 <a
                   className={cn(
-                    "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 transition-all duration-200 hover:scale-105",
+                    "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6",
                     location === item.href
-                      ? "bg-sidebar-accent text-sidebar-accent-foreground bounce-in"
+                      ? "bg-sidebar-accent text-sidebar-accent-foreground"
                       : "text-sidebar-foreground hover:bg-sidebar-accent/50"
                   )}
                 >
