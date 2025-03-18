@@ -79,13 +79,14 @@ app.use((req, res, next) => {
     const port = process.env.PORT || 5000;
 
     try {
-      // Listen on all network interfaces (0.0.0.0)
-      server.listen(port, "0.0.0.0", () => {
+      // Listen on localhost for local development
+      const host = process.env.NODE_ENV === "production" ? "0.0.0.0" : "localhost";
+      server.listen(port, host, () => {
         console.log(`
 =================================
 Server is running!
 Development mode: ${app.get("env") === "development"}
-URL: http://0.0.0.0:${port}
+URL: http://${host}:${port}
 =================================
 `);
       });
