@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { Trash2, ToggleLeft, ToggleRight } from 'lucide-react';
 
 interface GoogleMapProps {
   geofence: any;
@@ -16,6 +18,7 @@ export function GoogleMap({ geofence, onGeofenceChange }: GoogleMapProps) {
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [drawingManager, setDrawingManager] = useState<google.maps.drawing.DrawingManager | null>(null);
   const [currentPolygon, setCurrentPolygon] = useState<google.maps.Polygon | null>(null);
+  const [isGeofenceEnabled, setIsGeofenceEnabled] = useState(true);
 
   useEffect(() => {
     if (!mapRef.current || !window.google) return;
@@ -77,6 +80,14 @@ export function GoogleMap({ geofence, onGeofenceChange }: GoogleMapProps) {
         });
         onGeofenceChange({ type: 'Polygon', coordinates: [updatedCoordinates] });
       });
+
+      google.maps.event.addListener(path, 'insert_at', () => {
+        const updatedCoordinates = Array.from({ length: path.getLength() }, (_, i) => {
+          const point = path.getAt(i);
+          return [point.lng(), point.lat()];
+        });
+        onGeofenceChange({ type: 'Polygon', coordinates: [updatedCoordinates] });
+      });
     });
 
     return () => {
@@ -114,6 +125,7 @@ export function GoogleMap({ geofence, onGeofenceChange }: GoogleMapProps) {
         strokeColor: '#4338ca',
         editable: true,
         draggable: true,
+        visible: isGeofenceEnabled,
       });
 
       polygon.setMap(map);
@@ -129,7 +141,58 @@ export function GoogleMap({ geofence, onGeofenceChange }: GoogleMapProps) {
         onGeofenceChange({ type: 'Polygon', coordinates: [updatedCoordinates] });
       });
     }
-  }, [map, geofence]);
+  }, [map, geofence, isGeofenceEnabled]);
 
-  return <div ref={mapRef} className="w-full h-[400px] rounded-lg border" />;
+  const handleClearGeofence = () => {
+    if (currentPolygon) {
+      currentPolygon.setMap(null);
+      setCurrentPolygon(null);
+      onGeofenceChange(null);
+    }
+  };
+
+  const toggleGeofence = () => {
+    setIsGeofenceEnabled(!isGeofenceEnabled);
+    if (currentPolygon) {
+      currentPolygon.setVisible(!isGeofenceEnabled);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex gap-2">
+        <Button 
+          variant="outline" 
+          onClick={toggleGeofence}
+          className="flex items-center gap-2"
+        >
+          {isGeofenceEnabled ? (
+            <>
+              <ToggleRight className="h-4 w-4" />
+              Disable Geofence
+            </>
+          ) : (
+            <>
+              <ToggleLeft className="h-4 w-4" />
+              Enable Geofence
+            </>
+          )}
+        </Button>
+        <Button 
+          variant="destructive" 
+          onClick={handleClearGeofence}
+          className="flex items-center gap-2"
+        >
+          <Trash2 className="h-4 w-4" />
+          Clear Geofence
+        </Button>
+      </div>
+      <div ref={mapRef} className="w-full h-[400px] rounded-lg border" />
+      <p className="text-sm text-muted-foreground">
+        {isGeofenceEnabled 
+          ? "Geofence is active. Students must be within this area during class hours." 
+          : "Geofence is disabled. Attendance must be marked manually."}
+      </p>
+    </div>
+  );
 }
