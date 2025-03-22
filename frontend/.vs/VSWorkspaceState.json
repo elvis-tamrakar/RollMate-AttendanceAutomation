@@ -1,0 +1,14 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\client",
+    "\\client\\src",
+    "\\client\\src\\components",
+    "\\client\\src\\components\\auth",
+    "\\client\\src\\hooks",
+    "\\client\\src\\lib",
+    "\\server",
+    "\\shared"
+  ],
+  "PreviewInSolutionExplorer": false
+}
